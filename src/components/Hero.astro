@@ -64,6 +64,15 @@ import { hero } from '../content/site';
   .msg.left::before { inset: -50% -40% -50% -30%; }
   .msg.left h2 { font-size: clamp(32px, 4.3vw, 62px); }
 
+  @media (max-width: 600px) {
+    .msg.center, .msg.end, .msg.left {
+      left: 0; right: 0; top: 58%; bottom: auto;
+      max-width: none; padding: 0 7vw; border-left: 0; text-align: center;
+    }
+    .msg.left::before { inset: -60% -25%; }
+    .msg.left h2 { font-size: clamp(30px, 7.5vw, 46px); }
+  }
+
   .scroll-cue {
     position: absolute; z-index: 6; left: 50%; bottom: 3.5vh; transform: translateX(-50%);
     display: flex; flex-direction: column; align-items: center; gap: 10px;
@@ -88,6 +97,7 @@ import { hero } from '../content/site';
   const COUNT = 179;
   const BASE_URL = import.meta.env.BASE_URL;
   const SCROLL_SCREENS = 4; // pin length in screen heights
+  const isTouch = window.matchMedia('(pointer: coarse)').matches || 'ontouchstart' in window;
   const src = (i: number) => `${BASE_URL}frames/frame_${String(i + 1).padStart(4, '0')}.webp`;
 
   const canvas = document.getElementById('seq') as HTMLCanvasElement;
@@ -102,7 +112,7 @@ import { hero } from '../content/site';
 
   // ---- canvas sizing (cover fit, high-DPI) ----
   function resize() {
-    const dpr = Math.min(window.devicePixelRatio || 1, 2);
+    const dpr = Math.min(window.devicePixelRatio || 1, isTouch ? 1.5 : 2);
     canvas.width = Math.round(window.innerWidth * dpr);
     canvas.height = Math.round(window.innerHeight * dpr);
     drawn = -1;
@@ -202,7 +212,6 @@ import { hero } from '../content/site';
   }
 
   // ---- smooth scroll (desktop only) ----
-  const isTouch = window.matchMedia('(pointer: coarse)').matches || 'ontouchstart' in window;
   if (!isTouch) {
     const lenis = new Lenis({ lerp: 0.1, smoothWheel: true });
     (window as any).__lenis = lenis;
