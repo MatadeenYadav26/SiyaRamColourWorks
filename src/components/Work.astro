@@ -55,6 +55,9 @@ const sets = [0, 1];
   .marquee { position: relative; touch-action: pan-y; user-select: none; cursor: grab; }
   .marquee.is-drag { cursor: grabbing; }
   .marquee__track { display: flex; width: max-content; will-change: transform; }
+  .marquee__track.is-touch-loop { animation: work-loop var(--marquee-duration) linear infinite; }
+  .marquee__track.is-touch-loop:not(.is-visible) { animation-play-state: paused; }
+  @keyframes work-loop { to { transform: translate3d(var(--marquee-distance), 0, 0); } }
   .marquee__set { display: flex; gap: clamp(14px, 1.6vw, 24px); list-style: none; margin: 0; padding: 0 clamp(14px, 1.6vw, 24px) 0 0; }
   .tile { height: clamp(260px, 38vw, 520px); flex: none; }
   .tile:nth-child(even) { margin-top: clamp(24px, 4vw, 64px); }
@@ -89,6 +92,7 @@ const sets = [0, 1];
 
   const root = document.getElementById('work');
   const reduce = matchMedia('(prefers-reduced-motion: reduce)').matches;
+  const isTouch = matchMedia('(pointer: coarse)').matches || 'ontouchstart' in window;
 
   if (root && !reduce) {
     // reveal
@@ -107,65 +111,91 @@ const sets = [0, 1];
     // marquee
     const box = root.querySelector<HTMLElement>('[data-work-marquee]')!;
     const track = box.querySelector<HTMLElement>('.marquee__track')!;
-    const setX = gsap.quickSetter(track, 'x', 'px');
-    const BASE = 40; // px per second
-    const speed = { m: 1 };
-    let half = track.scrollWidth / 2;
-    let x = 0, vel = 0, dragging = false, lastX = 0, lastT = 0, running = false;
-    const wrap = () => gsap.utils.wrap(-half, 0, x);
+    const firstSet = track.querySelector<HTMLElement>('.marquee__set')!;
+    const BASE = 40;
+    const setWidth = () => firstSet.getBoundingClientRect().width || 1;
 
-    const tick = (_t: number, dt: number) => {
-      const s = Math.min(dt, 64) / 1000;
-      if (!dragging) {
-        x -= BASE * speed.m * s;
-        x += vel * s;
-        vel *= Math.pow(0.04, s); // inertia decay
-        if (Math.abs(vel) < 2) vel = 0;
-      }
-      x = wrap();
-      setX(x);
-    };
+    if (isTouch) {
+      track.classList.add('is-touch-loop');
+      const updateLoop = () => {
+        const width = setWidth();
+        track.style.setProperty('--marquee-distance', `${-width}px`);
+        track.style.setProperty('--marquee-duration', `${width / BASE}s`);
+      };
+      const observer = new IntersectionObserver(([entry]) => {
+        track.classList.toggle('is-visible', entry.isIntersecting);
+      });
+      observer.observe(box);
+      updateLoop();
+      window.addEventListener('resize', updateLoop);
+      box.querySelectorAll('img').forEach((im) => im.addEventListener('load', updateLoop, { once: true }));
+    } else {
+      const setX = gsap.quickSetter(track, 'x', 'px');
+      const speed = { m: 1 };
+      let half = setWidth();
+      let x = 0, vel = 0, dragging = false, lastX = 0, lastT = 0, running = false;
+      const wrap = () => {
+        if (x <= -half || x > 0) x = gsap.utils.wrap(-half, 0, x);
+        return x;
+      };
 
-    const measure = () => { half = track.scrollWidth / 2 || 1; };
-    window.addEventListener('resize', measure);
-    window.addEventListener('load', () => { measure(); ScrollTrigger.refresh(); });
-    box.querySelectorAll('img').forEach((im) => im.addEventListener('load', measure, { once: true }));
+      const tick = (_t: number, dt: number) => {
+        const s = Math.min(dt, 64) / 1000;
+        if (!dragging) {
+          x -= BASE * speed.m * s;
+          x += vel * s;
+          vel *= Math.pow(0.04, s);
+          if (Math.abs(vel) < 2) vel = 0;
+        }
+        x = wrap();
+        setX(x);
+      };
 
-    ScrollTrigger.create({
-      trigger: box, start: 'top bottom', end: 'bottom top',
-      onToggle: (self) => {
-        if (self.isActive && !running) { gsap.ticker.add(tick); running = true; }
-        else if (!self.isActive && running) { gsap.ticker.remove(tick); running = false; }
-      },
-    });
+      const measure = () => {
+        half = setWidth();
+        x = wrap();
+        setX(x);
+      };
+      window.addEventListener('resize', measure);
+      window.addEventListener('load', () => { measure(); ScrollTrigger.refresh(); });
+      box.querySelectorAll('img').forEach((im) => im.addEventListener('load', measure, { once: true }));
 
-    box.addEventListener('pointerenter', (e) => {
-      if (e.pointerType === 'mouse') gsap.to(speed, { m: 0.25, duration: 0.8, ease: 'power2.out' });
-    });
-    box.addEventListener('pointerleave', () => gsap.to(speed, { m: 1, duration: 0.8, ease: 'power2.out' }));
+      ScrollTrigger.create({
+        trigger: box, start: 'top bottom', end: 'bottom top',
+        onToggle: (self) => {
+          if (self.isActive && !running) { gsap.ticker.add(tick); running = true; }
+          else if (!self.isActive && running) { gsap.ticker.remove(tick); running = false; }
+        },
+      });
 
-    box.addEventListener('pointerdown', (e) => {
-      dragging = true; vel = 0; lastX = e.clientX; lastT = performance.now();
-      box.classList.add('is-drag');
-      box.setPointerCapture(e.pointerId);
-    });
-    box.addEventListener('pointermove', (e) => {
-      if (!dragging) return;
-      const now = performance.now();
-      const dx = e.clientX - lastX;
-      x += dx;
-      const dt = Math.max(now - lastT, 1);
-      vel = gsap.utils.clamp(-3000, 3000, (dx / dt) * 1000);
-      lastX = e.clientX; lastT = now;
-    });
-    const end = (e: PointerEvent) => {
-      if (!dragging) return;
-      dragging = false;
-      box.classList.remove('is-drag');
-      if (performance.now() - lastT > 80) vel = 0;
-      if (box.hasPointerCapture(e.pointerId)) box.releasePointerCapture(e.pointerId);
-    };
-    box.addEventListener('pointerup', end);
-    box.addEventListener('pointercancel', end);
+      box.addEventListener('pointerenter', (e) => {
+        if (e.pointerType === 'mouse') gsap.to(speed, { m: 0.25, duration: 0.8, ease: 'power2.out' });
+      });
+      box.addEventListener('pointerleave', () => gsap.to(speed, { m: 1, duration: 0.8, ease: 'power2.out' }));
+
+      box.addEventListener('pointerdown', (e) => {
+        dragging = true; vel = 0; lastX = e.clientX; lastT = performance.now();
+        box.classList.add('is-drag');
+        box.setPointerCapture(e.pointerId);
+      });
+      box.addEventListener('pointermove', (e) => {
+        if (!dragging) return;
+        const now = performance.now();
+        const dx = e.clientX - lastX;
+        x += dx;
+        const dt = Math.max(now - lastT, 1);
+        vel = gsap.utils.clamp(-3000, 3000, (dx / dt) * 1000);
+        lastX = e.clientX; lastT = now;
+      });
+      const end = (e: PointerEvent) => {
+        if (!dragging) return;
+        dragging = false;
+        box.classList.remove('is-drag');
+        if (performance.now() - lastT > 80) vel = 0;
+        if (box.hasPointerCapture(e.pointerId)) box.releasePointerCapture(e.pointerId);
+      };
+      box.addEventListener('pointerup', end);
+      box.addEventListener('pointercancel', end);
+    }
   }
 </script>
