@@ -9,6 +9,6 @@ npm ci
 npm run dev
 ```
 
-## GitHub Pages deployment
+## Deployment
 
-Push to `main` to build and deploy the site with GitHub Actions. The workflow publishes to the `github-pages` environment and adjusts asset URLs for the `SiyaRamColourWorks` repository path.
+The project is deployed from the `main` branch to Vercel. Push to `main` to trigger a production deployment.
