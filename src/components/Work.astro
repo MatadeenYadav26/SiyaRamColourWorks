@@ -1,0 +1,171 @@
+---
+import { work } from '../content/site';
+const sets = [0, 1];
+---
+<section id="work" class="work tint-linen" aria-labelledby="work-title">
+  <div class="wrap work__head">
+    <div class="work__side">
+      <p class="label" data-work-fade>{work.label}</p>
+    </div>
+    <h2 id="work-title" class="work__title split">
+      {work.heading.map((l) => (
+        <span class="line"><span>{l}</span></span>
+      ))}
+    </h2>
+  </div>
+
+  <div class="marquee" data-cursor={work.cursor} data-work-marquee>
+    <div class="marquee__track">
+      {sets.map((set) => (
+        <ul class="marquee__set" role="list" aria-hidden={set === 1 ? 'true' : undefined}>
+          {work.items.map((it) => (
+            <li class="tile" style={`aspect-ratio: ${it.w} / ${it.h}`}>
+              <figure>
+                <img src={it.src} alt={set === 0 ? it.caption : ''} width={it.w} height={it.h}
+                     loading="lazy" decoding="async" draggable="false" />
+                <figcaption>{it.caption}</figcaption>
+              </figure>
+            </li>
+          ))}
+        </ul>
+      ))}
+    </div>
+  </div>
+</section>
+
+<style>
+  .work { position: relative; z-index: 3; padding-block: var(--section-y); overflow: hidden; }
+  .work__head {
+    display: grid;
+    grid-template-columns: minmax(0, 3fr) minmax(0, 9fr);
+    gap: clamp(32px, 6vw, 112px);
+    align-items: end;
+    margin-bottom: clamp(40px, 6vw, 88px);
+  }
+  .work__title {
+    font-family: var(--serif);
+    font-weight: 500;
+    font-size: var(--fs-h2);
+    line-height: 0.98;
+    letter-spacing: -0.02em;
+    margin: 0;
+  }
+  .work__title .line { display: block; }
+
+  .marquee { position: relative; touch-action: pan-y; user-select: none; cursor: grab; }
+  .marquee.is-drag { cursor: grabbing; }
+  .marquee__track { display: flex; width: max-content; will-change: transform; }
+  .marquee__set { display: flex; gap: clamp(14px, 1.6vw, 24px); list-style: none; margin: 0; padding: 0 clamp(14px, 1.6vw, 24px) 0 0; }
+  .tile { height: clamp(260px, 38vw, 520px); flex: none; }
+  .tile:nth-child(even) { margin-top: clamp(24px, 4vw, 64px); }
+  .tile figure { margin: 0; height: 100%; position: relative; }
+  .tile img {
+    display: block; width: 100%; height: 100%; object-fit: cover;
+    border-radius: var(--radius); pointer-events: none;
+  }
+  .tile figcaption {
+    position: absolute; left: 0; top: 100%; padding-top: 10px;
+    font-size: var(--fs-label); letter-spacing: 0.04em; color: var(--muted);
+    opacity: 0; transform: translateY(6px);
+    transition: opacity 0.4s var(--ease-out), transform 0.4s var(--ease-out);
+  }
+  .tile:hover figcaption { opacity: 1; transform: none; }
+
+  @media (max-width: 860px), (hover: none) {
+    .work__head { grid-template-columns: 1fr; gap: 20px; }
+    .tile { height: clamp(220px, 58vw, 340px); }
+    .tile figcaption { opacity: 1; transform: none; }
+  }
+  @media (prefers-reduced-motion: reduce) {
+    .marquee { overflow-x: auto; cursor: auto; }
+    .marquee__set[aria-hidden] { display: none; }
+  }
+</style>
+
+<script>
+  import { gsap } from 'gsap';
+  import { ScrollTrigger } from 'gsap/ScrollTrigger';
+  gsap.registerPlugin(ScrollTrigger);
+
+  const root = document.getElementById('work');
+  const reduce = matchMedia('(prefers-reduced-motion: reduce)').matches;
+
+  if (root && !reduce) {
+    // reveal
+    const lines = root.querySelectorAll('.split .line > span');
+    const fades = root.querySelectorAll('[data-work-fade]');
+    const tiles = root.querySelectorAll('.marquee__set:first-child .tile');
+    gsap.set(lines, { yPercent: 110 });
+    gsap.set(fades, { autoAlpha: 0, y: 24 });
+    gsap.set(tiles, { autoAlpha: 0, y: 40 });
+    const tl = gsap.timeline({ paused: true, defaults: { ease: 'expo.out', duration: 1.1 } });
+    tl.to(fades, { autoAlpha: 1, y: 0, duration: 0.8, stagger: 0.1 })
+      .to(lines, { yPercent: 0, stagger: 0.12 }, '<0.1')
+      .to(tiles, { autoAlpha: 1, y: 0, stagger: 0.08, clearProps: 'transform' }, 0.3);
+    ScrollTrigger.create({ trigger: root, start: 'top 72%', once: true, onEnter: () => tl.play() });
+
+    // marquee
+    const box = root.querySelector<HTMLElement>('[data-work-marquee]')!;
+    const track = box.querySelector<HTMLElement>('.marquee__track')!;
+    const setX = gsap.quickSetter(track, 'x', 'px');
+    const BASE = 40; // px per second
+    const speed = { m: 1 };
+    let half = track.scrollWidth / 2;
+    let x = 0, vel = 0, dragging = false, lastX = 0, lastT = 0, running = false;
+    const wrap = () => gsap.utils.wrap(-half, 0, x);
+
+    const tick = (_t: number, dt: number) => {
+      const s = Math.min(dt, 64) / 1000;
+      if (!dragging) {
+        x -= BASE * speed.m * s;
+        x += vel * s;
+        vel *= Math.pow(0.04, s); // inertia decay
+        if (Math.abs(vel) < 2) vel = 0;
+      }
+      x = wrap();
+      setX(x);
+    };
+
+    const measure = () => { half = track.scrollWidth / 2 || 1; };
+    window.addEventListener('resize', measure);
+    window.addEventListener('load', () => { measure(); ScrollTrigger.refresh(); });
+    box.querySelectorAll('img').forEach((im) => im.addEventListener('load', measure, { once: true }));
+
+    ScrollTrigger.create({
+      trigger: box, start: 'top bottom', end: 'bottom top',
+      onToggle: (self) => {
+        if (self.isActive && !running) { gsap.ticker.add(tick); running = true; }
+        else if (!self.isActive && running) { gsap.ticker.remove(tick); running = false; }
+      },
+    });
+
+    box.addEventListener('pointerenter', (e) => {
+      if (e.pointerType === 'mouse') gsap.to(speed, { m: 0.25, duration: 0.8, ease: 'power2.out' });
+    });
+    box.addEventListener('pointerleave', () => gsap.to(speed, { m: 1, duration: 0.8, ease: 'power2.out' }));
+
+    box.addEventListener('pointerdown', (e) => {
+      dragging = true; vel = 0; lastX = e.clientX; lastT = performance.now();
+      box.classList.add('is-drag');
+      box.setPointerCapture(e.pointerId);
+    });
+    box.addEventListener('pointermove', (e) => {
+      if (!dragging) return;
+      const now = performance.now();
+      const dx = e.clientX - lastX;
+      x += dx;
+      const dt = Math.max(now - lastT, 1);
+      vel = gsap.utils.clamp(-3000, 3000, (dx / dt) * 1000);
+      lastX = e.clientX; lastT = now;
+    });
+    const end = (e: PointerEvent) => {
+      if (!dragging) return;
+      dragging = false;
+      box.classList.remove('is-drag');
+      if (performance.now() - lastT > 80) vel = 0;
+      if (box.hasPointerCapture(e.pointerId)) box.releasePointerCapture(e.pointerId);
+    };
+    box.addEventListener('pointerup', end);
+    box.addEventListener('pointercancel', end);
+  }
+</script>

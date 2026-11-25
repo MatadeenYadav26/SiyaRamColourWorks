@@ -1,0 +1,246 @@
+---
+import { enquiry, site } from '../content/site';
+---
+<section id="enquiry" class="enquiry tint-limewash" aria-labelledby="enquiry-title">
+  <div class="wrap enquiry__head">
+    <p class="label enquiry__label" data-enq-fade>{enquiry.label}</p>
+    <div>
+      <h2 id="enquiry-title" class="enquiry__title split">
+        <span class="line"><span>{enquiry.heading}</span></span>
+      </h2>
+      <p class="enquiry__line" data-enq-fade>{enquiry.line}</p>
+    </div>
+  </div>
+
+  <div class="wrap enquiry__body">
+    <aside class="enquiry__aside" data-enq-fade>
+      <p class="aside__title">{enquiry.whatsapp}</p>
+      <p class="aside__note">{enquiry.whatsappNote}</p>
+      <a class="aside__link" href={site.whatsapp} target="_blank" rel="noopener">
+        <span>WhatsApp</span> <span class="aside__num">{site.phoneDisplay}</span>
+      </a>
+      <a class="aside__link aside__link--muted" href={`tel:${site.phone}`}>Call {site.phoneDisplay}</a>
+    </aside>
+
+    <div class="enquiry__panel">
+      <!-- TODO: connect to database (Part 2) -->
+      <form class="enq-form" novalidate data-enq-form data-enq-fade>
+        <div class="field">
+          <label for="enq-name">Name</label>
+          <input id="enq-name" name="name" type="text" autocomplete="name" required />
+          <span class="stroke" aria-hidden="true"></span>
+          <p class="err" id="err-name" data-err-for="name" role="alert"></p>
+        </div>
+        <div class="field">
+          <label for="enq-phone">Phone</label>
+          <input id="enq-phone" name="phone" type="tel" inputmode="numeric" autocomplete="tel-national" maxlength="10" required />
+          <span class="stroke" aria-hidden="true"></span>
+          <p class="err" id="err-phone" data-err-for="phone" role="alert"></p>
+        </div>
+        <div class="field">
+          <label for="enq-area">Area</label>
+          <input id="enq-area" name="area" type="text" placeholder="e.g. Vesu, Adajan" required />
+          <span class="stroke" aria-hidden="true"></span>
+          <p class="err" id="err-area" data-err-for="area" role="alert"></p>
+        </div>
+
+        <fieldset class="chips">
+          <legend>Property type</legend>
+          {enquiry.types.map((t, i) => (
+            <label class="chip">
+              <input type="radio" name="type" value={t} checked={i === 0} />
+              <span>{t}</span>
+            </label>
+          ))}
+        </fieldset>
+
+        <div class="field">
+          <label for="enq-msg">Message <em>(optional)</em></label>
+          <textarea id="enq-msg" name="message" rows="2"></textarea>
+          <span class="stroke" aria-hidden="true"></span>
+        </div>
+
+        <button type="submit" class="submit" data-magnetic>
+          <span>{enquiry.submit}</span>
+          <svg width="22" height="12" viewBox="0 0 22 12" aria-hidden="true"><path d="M0 6h20M15 1l5 5-5 5" fill="none" stroke="currentColor" stroke-width="1.4"/></svg>
+        </button>
+      </form>
+
+      <div class="thanks" data-enq-thanks hidden aria-live="polite">
+        <svg class="splash" viewBox="0 0 200 160" aria-hidden="true">
+          <path d="M96 22c14-2 18 14 30 12s20-14 30-4-4 22 6 30 26 2 26 16-20 12-22 24 14 22 2 30-22-8-34-2-12 22-28 20-12-20-26-22-26 14-34 2 8-22 0-32-26-6-26-22 22-12 24-24-12-20 0-28 20 8 32 2 6-20 20-22z" fill="var(--gold)"/>
+          <circle cx="178" cy="30" r="6" fill="var(--gold)"/>
+          <circle cx="20" cy="132" r="4" fill="var(--gold)"/>
+          <circle cx="166" cy="140" r="3" fill="var(--gold)"/>
+        </svg>
+        <p class="thanks__title">{enquiry.thanks}</p>
+        <p class="thanks__note">{enquiry.thanksNote}</p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<style>
+  .enquiry { position: relative; z-index: 3; padding-block: var(--section-y); }
+  .enquiry__head, .enquiry__body {
+    display: grid;
+    grid-template-columns: minmax(0, 3fr) minmax(0, 9fr);
+    gap: clamp(32px, 6vw, 112px);
+  }
+  .enquiry__head { align-items: start; margin-bottom: clamp(40px, 6vw, 88px); }
+  .enquiry__label { padding-top: 1.2em; border-top: 1px solid rgba(27, 27, 27, 0.18); }
+  .enquiry__title {
+    font-family: var(--serif); font-weight: 500; font-size: var(--fs-h2);
+    line-height: 0.98; letter-spacing: -0.02em; margin: 0;
+  }
+  .enquiry__title .line { display: block; overflow: hidden; padding-bottom: 0.06em; }
+  .enquiry__title .line > span { display: inline-block; }
+  .enquiry__line { margin: 18px 0 0; max-width: 46ch; color: var(--muted); }
+
+  .enquiry__aside { padding-top: 1.2em; border-top: 1px solid rgba(27, 27, 27, 0.18); align-self: start; }
+  .aside__title { font-family: var(--serif); font-size: clamp(22px, 2vw, 30px); margin: 0 0 8px; }
+  .aside__note { font-size: var(--fs-label); color: var(--muted); line-height: 1.5; margin: 0 0 18px; max-width: 26ch; }
+  .aside__link {
+    display: block; color: var(--ink); text-decoration: none; padding: 10px 0;
+    border-bottom: 1px solid rgba(27, 27, 27, 0.18); font-size: 15px;
+  }
+  .aside__link:hover { color: var(--blue); }
+  .aside__num { color: var(--muted); }
+  .aside__link--muted { font-size: var(--fs-label); color: var(--muted); }
+
+  .enquiry__panel { position: relative; max-width: 760px; }
+  .enq-form { display: grid; grid-template-columns: 1fr 1fr; gap: 34px clamp(24px, 3vw, 48px); }
+  .field { position: relative; }
+  .field:nth-of-type(3), .field:last-of-type, .chips { grid-column: 1 / -1; }
+  .field label, .chips legend {
+    display: block; font-size: var(--fs-label); letter-spacing: 0.06em; text-transform: uppercase; color: var(--muted);
+    margin-bottom: 6px;
+  }
+  .field label em { text-transform: none; font-style: normal; opacity: 0.7; }
+  .field input, .field textarea {
+    width: 100%; border: 0; border-bottom: 1px solid rgba(27, 27, 27, 0.3); border-radius: 0;
+    background: transparent; font: inherit; font-family: var(--serif); font-size: clamp(20px, 1.8vw, 26px);
+    color: var(--ink); padding: 6px 0 10px; outline: none; resize: vertical;
+  }
+  .field input::placeholder { color: rgba(27, 27, 27, 0.28); }
+  /* painted stroke: an irregular gold band that sweeps in on focus */
+  .stroke {
+    position: absolute; left: -2px; right: -2px; height: 5px; top: auto;
+    background: var(--gold); border-radius: 2px 6px 3px 5px / 3px 2px 4px 2px;
+    transform: scaleX(0); transform-origin: left center;
+    transition: transform 0.7s var(--ease-out);
+    pointer-events: none;
+  }
+  .field input + .stroke, .field textarea + .stroke { margin-top: -4px; }
+  .field:focus-within .stroke { transform: scaleX(1); }
+  .field.is-bad input { border-bottom-color: #B4412F; }
+  .err { margin: 8px 0 0; min-height: 1em; font-size: var(--fs-label); color: #B4412F; }
+
+  .chips { border: 0; padding: 0; margin: 0; display: flex; flex-wrap: wrap; gap: 10px; }
+  .chips legend { width: 100%; margin-bottom: 12px; }
+  .chip { position: relative; }
+  .chip input { position: absolute; opacity: 0; inset: 0; margin: 0; cursor: pointer; }
+  .chip span {
+    display: inline-block; padding: 9px 18px; border: 1px solid rgba(27, 27, 27, 0.3); border-radius: var(--radius);
+    font-size: 14px; transition: background-color 0.3s, color 0.3s, border-color 0.3s;
+  }
+  .chip input:checked + span { background: var(--ink); color: var(--paper); border-color: var(--ink); }
+  .chip input:focus-visible + span { outline: 2px solid var(--blue); outline-offset: 2px; }
+
+  .submit {
+    justify-self: start; display: inline-flex; align-items: center; gap: 16px;
+    padding: 20px 30px; border: 0; border-radius: var(--radius);
+    background: var(--blue); color: var(--paper); font: inherit; font-size: 15px; font-weight: 600;
+    cursor: pointer; margin-top: 6px;
+  }
+  .submit svg { transition: transform 0.4s var(--ease-out); }
+  .submit:hover svg { transform: translateX(6px); }
+
+  .thanks { padding-block: clamp(24px, 4vw, 48px); position: relative; }
+  .thanks[hidden] { display: none; }
+  .splash { width: clamp(120px, 16vw, 200px); height: auto; display: block; margin-bottom: 20px; transform-origin: 40% 50%; }
+  .thanks__title { font-family: var(--serif); font-size: clamp(28px, 3.4vw, 52px); line-height: 1.05; margin: 0 0 12px; max-width: 18ch; }
+  .thanks__note { color: var(--muted); max-width: 42ch; margin: 0; }
+
+  @media (max-width: 860px), (hover: none) {
+    .enquiry { padding-bottom: calc(var(--section-y) + 96px); }
+    .enquiry__head, .enquiry__body { grid-template-columns: 1fr; gap: 24px; }
+    .enquiry__aside { order: 2; margin-top: 24px; }
+    .enq-form { grid-template-columns: 1fr; gap: 28px; }
+    .submit { width: 100%; justify-content: space-between; }
+  }
+</style>
+
+<script>
+  import { gsap } from 'gsap';
+  import { ScrollTrigger } from 'gsap/ScrollTrigger';
+  import { initMagnetic } from '../scripts/magnetic';
+  import { enquiry, site } from '../content/site';
+  gsap.registerPlugin(ScrollTrigger);
+
+  const root = document.getElementById('enquiry');
+  const reduce = matchMedia('(prefers-reduced-motion: reduce)').matches;
+  initMagnetic('#enquiry [data-magnetic]', 0.3);
+
+  if (root && !reduce) {
+    const lines = root.querySelectorAll('.split .line > span');
+    const fades = root.querySelectorAll('[data-enq-fade]');
+    gsap.set(lines, { yPercent: 110 });
+    gsap.set(fades, { autoAlpha: 0, y: 24 });
+    const tl = gsap.timeline({ paused: true, defaults: { ease: 'expo.out', duration: 1.1 } });
+    tl.to(lines, { yPercent: 0 })
+      .to(fades, { autoAlpha: 1, y: 0, duration: 0.9, stagger: 0.1, clearProps: 'transform' }, 0.15);
+    ScrollTrigger.create({ trigger: root, start: 'top 72%', once: true, onEnter: () => tl.play() });
+    window.addEventListener('load', () => ScrollTrigger.refresh());
+  }
+
+  const form = root?.querySelector<HTMLFormElement>('[data-enq-form]');
+  const thanks = root?.querySelector<HTMLElement>('[data-enq-thanks]');
+  const PHONE = /^[6-9]\d{9}$/;
+
+  const setErr = (name: 'name' | 'phone' | 'area', msg: string) => {
+    const p = form!.querySelector<HTMLElement>(`[data-err-for="${name}"]`)!;
+    const input = form!.elements.namedItem(name) as HTMLInputElement;
+    p.textContent = msg;
+    input.closest('.field')!.classList.toggle('is-bad', !!msg);
+    input.setAttribute('aria-invalid', msg ? 'true' : 'false');
+    if (msg) input.setAttribute('aria-describedby', p.id); else input.removeAttribute('aria-describedby');
+  };
+
+  const phoneInput = form?.elements.namedItem('phone') as HTMLInputElement | null;
+  phoneInput?.addEventListener('input', () => { phoneInput.value = phoneInput.value.replace(/\D/g, '').slice(0, 10); });
+
+  form?.addEventListener('submit', (e) => {
+    e.preventDefault();
+    const fd = new FormData(form);
+    const name = String(fd.get('name') || '').trim();
+    const phone = String(fd.get('phone') || '').trim();
+    const area = String(fd.get('area') || '').trim();
+    const type = String(fd.get('type') || '');
+    const message = String(fd.get('message') || '').trim();
+
+    setErr('name', name ? '' : enquiry.errors.name);
+    setErr('phone', PHONE.test(phone) ? '' : enquiry.errors.phone);
+    setErr('area', area ? '' : enquiry.errors.area);
+    const bad = form.querySelector<HTMLInputElement>('.is-bad input');
+    if (bad) { bad.focus(); return; }
+
+    // TODO: connect to database (Part 2)
+
+    const text = [
+      `Hi, I'd like a site visit.`,
+      `Name: ${name}`, `Phone: ${phone}`, `Area: ${area}`, `Property: ${type}`,
+      message ? `Message: ${message}` : '',
+    ].filter(Boolean).join('\n');
+    const waNumber = site.phone.replace(/\D/g, '');
+    window.open(`https://wa.me/${waNumber}?text=${encodeURIComponent(text)}`, '_blank', 'noopener');
+
+    form.hidden = true;
+    thanks!.hidden = false;
+    if (!reduce) {
+      gsap.fromTo(thanks!.querySelector('.splash'), { scale: 0.2, rotate: -20, opacity: 0 }, { scale: 1, rotate: 0, opacity: 1, duration: 0.9, ease: 'back.out(1.8)' });
+      gsap.fromTo(thanks!.querySelectorAll('p'), { y: 20, opacity: 0 }, { y: 0, opacity: 1, duration: 0.8, stagger: 0.1, delay: 0.2, ease: 'expo.out' });
+    }
+    ScrollTrigger.refresh();
+  });
+</script>

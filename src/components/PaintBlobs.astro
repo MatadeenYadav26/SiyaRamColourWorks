@@ -1,0 +1,80 @@
+<div class="blobs" aria-hidden="true">
+  <svg class="blob blob-blue" viewBox="0 0 200 200" data-speed="0.15" data-shift="30">
+    <path fill="var(--blue)" d="M43.5,-63.6C55.6,-53.4,63.6,-39.3,69.4,-23.9C75.2,-8.5,78.8,8.2,73.9,22.3C69,36.4,55.6,47.9,41.1,57.4C26.6,66.9,11,74.4,-5.2,81.5C-21.4,88.6,-38.3,95.3,-50.3,88.2C-62.3,81.1,-69.4,60.2,-74.4,40.6C-79.4,21,-82.3,2.7,-77.9,-13.1C-73.5,-28.9,-61.8,-42.2,-48.4,-52.2C-35,-62.2,-20,-68.9,-3.6,-64C12.8,-59.1,31.4,-73.8,43.5,-63.6Z" transform="translate(100 100)" />
+  </svg>
+  <svg class="blob blob-gold" viewBox="0 0 200 200" data-speed="-0.1" data-shift="-24">
+    <path fill="var(--gold)" d="M39.9,-52.6C51.4,-46.2,60.4,-34.6,66.5,-20.7C72.6,-6.8,75.8,9.4,70.6,22.6C65.4,35.8,51.8,46,37.6,55.3C23.4,64.6,8.6,73,-7.7,73.9C-24,74.8,-41.8,68.2,-53.5,56C-65.2,43.8,-70.8,26,-72.6,8.2C-74.4,-9.6,-72.4,-27.4,-63,-39.6C-53.6,-51.8,-36.8,-58.4,-21.6,-63.4C-6.4,-68.4,7.2,-71.8,19.6,-68.1C32,-64.4,28.4,-59,39.9,-52.6Z" transform="translate(100 100)" />
+  </svg>
+</div>
+
+<style>
+  .blobs {
+    position: fixed;
+    inset: 0;
+    z-index: 0;
+    pointer-events: none;
+    overflow: hidden;
+  }
+  .blob {
+    position: absolute;
+    width: clamp(260px, 38vw, 620px);
+    opacity: .09;
+    filter: blur(30px);
+    will-change: transform;
+  }
+  .blob-blue { top: 8%; right: -10%; }
+  .blob-gold { bottom: -6%; left: -12%; opacity: .12; }
+</style>
+
+<script>
+  import { gsap } from 'gsap';
+
+  const reduced = matchMedia('(prefers-reduced-motion: reduce)').matches;
+  const blobs = Array.from(document.querySelectorAll<SVGElement>('.blob'));
+
+  if (!reduced && blobs.length) {
+    // Slow drift + rotation on the inner path (keeps the outer free for parallax/mouse)
+    blobs.forEach((b, i) => {
+      const p = b.querySelector('path');
+      gsap.to(p, {
+        rotation: i ? -360 : 360,
+        transformOrigin: '100px 100px',
+        duration: 90 + i * 30,
+        repeat: -1,
+        ease: 'none',
+      });
+      gsap.to(b, {
+        xPercent: i ? 8 : -6,
+        yPercent: i ? -6 : 8,
+        duration: 14 + i * 4,
+        yoyo: true,
+        repeat: -1,
+        ease: 'sine.inOut',
+      });
+    });
+
+    // Parallax on scroll + mouse shift (combined into y / x)
+    const setters = blobs.map((b) => ({
+      x: gsap.quickTo(b, 'x', { duration: 1.2, ease: 'power3' }),
+      y: gsap.quickTo(b, 'y', { duration: 1.2, ease: 'power3' }),
+      speed: Number(b.dataset.speed || 0),
+      shift: Number(b.dataset.shift || 0),
+    }));
+    let mx = 0, my = 0;
+    const update = () => {
+      const sy = window.scrollY;
+      setters.forEach((s) => {
+        s.x(mx * s.shift);
+        s.y(-sy * s.speed + my * s.shift);
+      });
+    };
+    window.addEventListener('scroll', update, { passive: true });
+    if (matchMedia('(pointer: fine)').matches) {
+      window.addEventListener('pointermove', (e) => {
+        mx = e.clientX / innerWidth - 0.5;
+        my = e.clientY / innerHeight - 0.5;
+        update();
+      }, { passive: true });
+    }
+  }
+</script>

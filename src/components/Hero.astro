@@ -1,0 +1,286 @@
+---
+// Scroll-scrubbed frame sequence. Animation logic unchanged from the approved test page.
+import { hero } from '../content/site';
+const FRAME_COUNT = 179;
+const BASE_URL = `${import.meta.env.BASE_URL.replace(/\/$/, '')}/`;
+---
+<section class="hero" id="hero">
+  <canvas id="seq" aria-label="Scroll animation"></canvas>
+  {hero.messages.map((m) => (
+    <div class={`msg ${m.cls}`} data-from={m.from} data-to={m.to}>
+      <span class="eyebrow">{m.eyebrow}</span>
+      <h2 set:html={m.html} />
+    </div>
+  ))}
+  <div class="scroll-cue" aria-hidden="true"><span>{hero.scrollCue}</span><i></i></div>
+</section>
+
+<div class="hud" id="loader">0%</div>
+
+<style is:global>
+  .hero { position: relative; height: 100vh; overflow: hidden; background: #000; z-index: 2; }
+  #seq { display: block; width: 100vw; height: 100vh; }
+  .hud {
+    position: fixed; z-index: 10; font: 12px/1 ui-monospace, Menlo, Consolas, monospace;
+    color: #fff; background: rgba(0,0,0,.55); padding: 6px 8px; border-radius: 4px;
+    pointer-events: none;
+  }
+  #loader { left: 50%; top: 50%; transform: translate(-50%, -50%); font-size: 14px; }
+  .msg {
+    position: absolute; z-index: 5; color: #fffaf0; pointer-events: none;
+    opacity: 0; will-change: transform, opacity;
+    font-family: 'Montserrat', system-ui, sans-serif;
+  }
+  .msg::before {
+    content: ''; position: absolute; z-index: -1; inset: -60% -25%;
+    background: radial-gradient(closest-side, rgba(10,8,20,.62), rgba(10,8,20,.3) 55%, transparent);
+    filter: blur(6px);
+  }
+  .msg .eyebrow {
+    display: inline-flex; align-items: center; gap: .8em;
+    font-size: clamp(11px, 1vw, 13px); font-weight: 700;
+    letter-spacing: .32em; text-transform: uppercase; color: #ffcf4a;
+    margin-bottom: .9em;
+    text-shadow: 0 1px 2px rgba(0,0,0,.8), 0 0 14px rgba(0,0,0,.6);
+  }
+  .msg h2 {
+    margin: 0; font-family: 'Montserrat', system-ui, sans-serif;
+    font-weight: 600; line-height: 1.08; letter-spacing: -.02em;
+    font-size: clamp(34px, 5.2vw, 76px);
+    text-shadow: 0 2px 3px rgba(0,0,0,.55), 0 6px 24px rgba(0,0,0,.55), 0 0 2px rgba(0,0,0,.4);
+  }
+  .msg h2 em { font-style: normal; color: #ffcf4a; }
+  .msg h2 .w { display: inline-block; will-change: transform, opacity; }
+
+  .msg.center, .msg.end { left: 0; right: 0; bottom: 16vh; text-align: center; padding: 0 6vw; }
+  .msg.center .eyebrow::before, .msg.center .eyebrow::after,
+  .msg.end .eyebrow::before, .msg.end .eyebrow::after {
+    content: ''; width: 2.2em; height: 1px; background: currentColor; opacity: .8;
+  }
+  .msg.end { bottom: 9vh; }
+
+  .msg.left {
+    left: 6vw; bottom: 12vh; max-width: min(620px, 84vw); text-align: left;
+    padding-left: 1.1em; border-left: 3px solid #ffcf4a;
+  }
+  .msg.left::before { inset: -50% -40% -50% -30%; }
+  .msg.left h2 { font-size: clamp(32px, 4.3vw, 62px); }
+
+  .scroll-cue {
+    position: absolute; z-index: 6; left: 50%; bottom: 3.5vh; transform: translateX(-50%);
+    display: flex; flex-direction: column; align-items: center; gap: 10px;
+    color: rgba(255,250,240,.8); font: 600 10px/1 var(--sans); letter-spacing: .3em; text-transform: uppercase;
+    pointer-events: none; transition: opacity .5s var(--ease-out);
+  }
+  .scroll-cue i { position: relative; width: 1px; height: 44px; background: rgba(255,250,240,.25); overflow: hidden; }
+  .scroll-cue i::after {
+    content: ''; position: absolute; left: 0; top: 0; width: 1px; height: 40%;
+    background: #ffcf4a; animation: cue 1.8s var(--ease-out) infinite;
+  }
+  @keyframes cue { from { transform: translateY(-100%); } to { transform: translateY(260%); } }
+</style>
+
+<script define:vars={{ FRAME_COUNT, BASE_URL }}>
+  window.__FRAME_COUNT = FRAME_COUNT;
+</script>
+<script>
+  import gsap from 'gsap';
+  import { ScrollTrigger } from 'gsap/ScrollTrigger';
+  import Lenis from 'lenis';
+
+  gsap.registerPlugin(ScrollTrigger);
+
+  const COUNT: number = (window as any).__FRAME_COUNT;
+  const SCROLL_SCREENS = 4; // pin length in screen heights
+  const src = (i: number) => `${BASE_URL}frames/frame_${String(i + 1).padStart(4, '0')}.webp`;
+
+  const canvas = document.getElementById('seq') as HTMLCanvasElement;
+  const ctx = canvas.getContext('2d')!;
+  const loaderEl = document.getElementById('loader')!;
+
+  const frames: (HTMLImageElement | null)[] = new Array(COUNT).fill(null);
+  let current = 0;
+  let drawn = -1;
+  const t0 = performance.now();
+  const stats: any = ((window as any).__stats = { firstFrameMs: 0, allLoadedMs: 0, draws: 0 });
+
+  // ---- canvas sizing (cover fit, high-DPI) ----
+  function resize() {
+    const dpr = Math.min(window.devicePixelRatio || 1, 2);
+    canvas.width = Math.round(window.innerWidth * dpr);
+    canvas.height = Math.round(window.innerHeight * dpr);
+    drawn = -1;
+    render();
+  }
+
+  function nearestLoaded(i: number) {
+    if (frames[i]) return i;
+    for (let d = 1; d < COUNT; d++) {
+      if (i - d >= 0 && frames[i - d]) return i - d;
+      if (i + d < COUNT && frames[i + d]) return i + d;
+    }
+    return -1;
+  }
+
+  // ---- portrait (mobile) logo framing ----
+  const REVEAL_START = 129;
+  const REVEAL_END = 150;
+  const FX = 0.51, FY = 0.46;
+  const LOGO_W = 1100;
+  const smooth = (t: number) => t * t * (3 - 2 * t);
+
+  function render() {
+    const i = nearestLoaded(current);
+    if (i < 0 || i === drawn) return;
+    const img = frames[i]!;
+    const iw = img.naturalWidth, ih = img.naturalHeight;
+    const cw = canvas.width, ch = canvas.height;
+    const cover = Math.max(cw / iw, ch / ih);
+
+    if (cw >= ch) {
+      const w = iw * cover, h = ih * cover;
+      ctx.drawImage(img, (cw - w) / 2, (ch - h) / 2, w, h);
+    } else {
+      const t = smooth(Math.max(0, Math.min(1, (i - REVEAL_START) / (REVEAL_END - REVEAL_START))));
+      const fit = Math.min(cover, (cw * 0.92) / (LOGO_W * (iw / 1920)));
+      const scale = cover + (fit - cover) * t;
+      const w = iw * scale, h = ih * scale;
+      let x = cw / 2 - FX * w, y = ch / 2 - FY * h;
+      x = w >= cw ? Math.min(0, Math.max(cw - w, x)) : x;
+      y = h >= ch ? Math.min(0, Math.max(ch - h, y)) : y;
+      if (t > 0) {
+        const cwid = iw * cover, chei = ih * cover;
+        ctx.save();
+        ctx.filter = 'blur(24px) brightness(0.45)';
+        ctx.drawImage(img, cw / 2 - FX * cwid, (ch - chei) / 2, cwid, chei);
+        ctx.restore();
+      }
+      ctx.drawImage(img, x, y, w, h);
+    }
+    drawn = i;
+    stats.draws++;
+  }
+
+  function setFrame(i: number) {
+    i = Math.max(0, Math.min(COUNT - 1, i));
+    if (i === current) return;
+    current = i;
+    requestAnimationFrame(render);
+  }
+
+  // ---- preload: frame 1 first, then the rest ----
+  function load(i: number) {
+    return new Promise<void>((resolve) => {
+      const img = new Image();
+      img.decoding = 'async';
+      img.src = src(i);
+      img.decode().catch(() => {}).finally(() => {
+        if (img.naturalWidth) frames[i] = img;
+        resolve();
+      });
+    });
+  }
+
+  let loaded = 0;
+  async function preload() {
+    await load(0);
+    stats.firstFrameMs = Math.round(performance.now() - t0);
+    loaded = 1;
+    resize();
+    const rest = [];
+    for (let i = 1; i < COUNT; i++) {
+      rest.push(load(i).then(() => {
+        loaded++;
+        loaderEl.textContent = `${Math.round((loaded / COUNT) * 100)}%`;
+        if (Math.abs(i - current) < 3) requestAnimationFrame(render);
+      }));
+    }
+    await Promise.all(rest);
+    stats.allLoadedMs = Math.round(performance.now() - t0);
+    console.log(`[frames] first frame ${stats.firstFrameMs} ms, all ${COUNT} loaded in ${stats.allLoadedMs} ms`);
+    loaderEl.textContent = '100%';
+    setTimeout(() => (loaderEl.style.display = 'none'), 400);
+  }
+
+  // ---- smooth scroll (desktop only) ----
+  const isTouch = window.matchMedia('(pointer: coarse)').matches || 'ontouchstart' in window;
+  if (!isTouch) {
+    const lenis = new Lenis({ lerp: 0.1, smoothWheel: true });
+    (window as any).__lenis = lenis;
+    lenis.on('scroll', ScrollTrigger.update);
+    gsap.ticker.add((time) => lenis.raf(time * 1000));
+    gsap.ticker.lagSmoothing(0);
+  }
+
+  // ---- scroll-linked text ----
+  const FADE = 9;
+  const clamp01 = (v: number) => Math.max(0, Math.min(1, v));
+  const msgs = Array.from(document.querySelectorAll<HTMLElement>('.msg')).map((el) => {
+    const h = el.querySelector('h2')!;
+    const wrap = (t: string) => t.split(/(\s+)/).map((s) => (s.trim() ? `<span class="w">${s}</span>` : s)).join('');
+    h.innerHTML = Array.from(h.childNodes)
+      .map((n) => (n.nodeType === 3 ? wrap(n.textContent!) : `<em>${wrap(n.textContent!)}</em>`))
+      .join('');
+    return {
+      el, from: +el.dataset.from!, to: +el.dataset.to!,
+      words: Array.from(h.querySelectorAll<HTMLElement>('.w')),
+    };
+  });
+  let mx = 0, my = 0;
+  let lastF = 0;
+
+  function updateText(f: number) {
+    lastF = f;
+    for (const m of msgs) {
+      const vis = Math.min(clamp01((f - m.from) / FADE), clamp01((m.to - f) / FADE));
+      const p = clamp01((f - m.from) / (m.to - m.from));
+      const drift = (0.5 - p) * 50;
+      m.el.style.opacity = String(vis);
+      m.el.style.transform = `translate3d(${mx * -14}px, ${drift + my * -8}px, 0)`;
+      m.words.forEach((w, k) => {
+        const inT = clamp01((f - m.from - k * 1.6) / 7);
+        const outT = clamp01((m.to - f - (m.words.length - 1 - k) * 1.2) / 7);
+        const t = smooth(Math.min(inT, outT));
+        w.style.opacity = String(t);
+        w.style.transform = `translateY(${(1 - t) * 0.6}em)`;
+      });
+    }
+  }
+
+  if (!isTouch) {
+    window.addEventListener('pointermove', (e) => {
+      mx = e.clientX / window.innerWidth - 0.5;
+      my = e.clientY / window.innerHeight - 0.5;
+      requestAnimationFrame(() => updateText(lastF));
+    });
+  }
+  updateText(0);
+
+  // ---- scroll -> frame (after text setup: onUpdate fires during create) ----
+  ScrollTrigger.create({
+    trigger: '#hero',
+    start: 'top top',
+    end: () => `+=${window.innerHeight * SCROLL_SCREENS}`,
+    pin: true,
+    scrub: true,
+    invalidateOnRefresh: true,
+    onUpdate: (self) => {
+      const f = self.progress * (COUNT - 1);
+      setFrame(Math.round(f));
+      updateText(f);
+    },
+  });
+
+  let resizeTimer: number | undefined;
+  window.addEventListener('resize', () => {
+    clearTimeout(resizeTimer);
+    resizeTimer = window.setTimeout(() => { resize(); ScrollTrigger.refresh(); }, 100);
+  });
+
+  // scroll cue hides once the user starts scrolling
+  const cue = document.querySelector<HTMLElement>('.scroll-cue');
+  const onCue = () => { if (cue) cue.style.opacity = window.scrollY > 40 ? '0' : '1'; };
+  window.addEventListener('scroll', onCue, { passive: true });
+
+  preload();
+</script>

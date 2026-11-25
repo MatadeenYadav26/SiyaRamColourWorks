@@ -1,0 +1,177 @@
+---
+import { services } from '../content/site';
+---
+<section id="services" class="services tint-concrete" aria-labelledby="services-title">
+  <div class="wrap services__grid">
+    <header class="services__head">
+      <p class="label" data-svc-fade>{services.label}</p>
+      <h2 id="services-title" class="services__title split">
+        {services.heading.map((l) => (
+          <span class="line"><span>{l}</span></span>
+        ))}
+      </h2>
+    </header>
+
+    <ul class="services__list" role="list">
+      {services.items.map((s, i) => (
+        <li class="svc" data-svc-row data-src={s.src}>
+          <span class="svc__rule" aria-hidden="true"></span>
+          <div class="svc__inner">
+            <span class="svc__num">{String(i + 1).padStart(2, '0')}</span>
+            <span class="svc__name">{s.name}</span>
+            <span class="svc__note">{s.note}</span>
+            <img class="svc__thumb" src={s.src} alt="" width="160" height="120" loading="lazy" decoding="async" />
+          </div>
+        </li>
+      ))}
+      <li class="svc svc--end" aria-hidden="true"><span class="svc__rule"></span></li>
+    </ul>
+  </div>
+
+  <div class="svc-preview" aria-hidden="true">
+    <div class="svc-preview__frame">
+      {services.items.map((s, i) => (
+        <img src={s.src} alt="" loading="lazy" decoding="async" data-i={i} />
+      ))}
+    </div>
+  </div>
+</section>
+
+<style>
+  .services { position: relative; z-index: 3; padding-block: var(--section-y); }
+  .services__grid {
+    display: grid;
+    grid-template-columns: minmax(0, 3fr) minmax(0, 9fr);
+    gap: clamp(32px, 6vw, 112px);
+    align-items: start;
+  }
+  .services__head { position: sticky; top: 18vh; }
+  .services__title {
+    font-family: var(--serif);
+    font-weight: 500;
+    font-size: var(--fs-h2);
+    line-height: 0.98;
+    letter-spacing: -0.02em;
+    margin: clamp(18px, 2vw, 28px) 0 0;
+  }
+  .services__title .line { display: block; }
+
+  .services__list { list-style: none; margin: 0; padding: 0; }
+  .svc { position: relative; }
+  .svc__rule {
+    display: block; height: 1px; background: rgba(27, 27, 27, 0.22);
+    transform-origin: left center;
+  }
+  .svc__inner {
+    display: grid;
+    grid-template-columns: 3.5rem minmax(0, 1fr) minmax(0, 15rem);
+    align-items: baseline;
+    gap: clamp(12px, 2vw, 32px);
+    padding-block: clamp(22px, 3.2vw, 44px);
+    transition: transform 0.7s var(--ease-out), color 0.5s var(--ease-out);
+  }
+  .svc__num { font-size: var(--fs-label); letter-spacing: 0.08em; color: var(--muted); }
+  .svc__name {
+    font-family: var(--serif);
+    font-weight: 400;
+    font-size: clamp(32px, 5.4vw, 84px);
+    line-height: 1;
+    letter-spacing: -0.02em;
+  }
+  .svc__note { font-size: var(--fs-label); color: var(--muted); letter-spacing: 0.04em; text-align: right; }
+  .svc__thumb { display: none; }
+
+  @media (hover: hover) and (pointer: fine) {
+    .svc:hover .svc__inner { transform: translateX(clamp(12px, 2vw, 32px)); color: var(--blue); }
+    .svc:hover .svc__num { color: var(--gold); }
+  }
+
+  /* floating cursor preview (desktop only, enabled by script) */
+  .svc-preview {
+    position: fixed; left: 0; top: 0; z-index: 40;
+    width: clamp(220px, 20vw, 320px); aspect-ratio: 4 / 5;
+    pointer-events: none; opacity: 0; visibility: hidden;
+  }
+  .svc-preview__frame {
+    position: absolute; inset: 0; overflow: hidden; border-radius: var(--radius);
+    transform: translate(-50%, -50%);
+  }
+  .svc-preview img {
+    position: absolute; inset: 0; width: 100%; height: 100%; object-fit: cover;
+    opacity: 0; transition: opacity 0.45s var(--ease-out);
+  }
+  .svc-preview img.is-on { opacity: 1; }
+
+  @media (max-width: 860px), (hover: none) {
+    .services__grid { grid-template-columns: 1fr; }
+    .services__head { position: static; }
+    .svc__inner { grid-template-columns: 2.2rem minmax(0, 1fr) 84px; align-items: center; row-gap: 4px; }
+    .svc__name { font-size: clamp(26px, 7vw, 44px); grid-column: 2; }
+    .svc__note { grid-column: 2; grid-row: 2; text-align: left; }
+    .svc__num { grid-row: 1 / span 2; align-self: start; padding-top: 0.5em; }
+    .svc__thumb {
+      display: block; grid-column: 3; grid-row: 1 / span 2;
+      width: 84px; height: 64px; object-fit: cover; border-radius: var(--radius);
+    }
+    .svc-preview { display: none; }
+  }
+</style>
+
+<script>
+  import { gsap } from 'gsap';
+  import { ScrollTrigger } from 'gsap/ScrollTrigger';
+  gsap.registerPlugin(ScrollTrigger);
+
+  const root = document.getElementById('services');
+  const reduce = matchMedia('(prefers-reduced-motion: reduce)').matches;
+  const fine = matchMedia('(hover: hover) and (pointer: fine)').matches && innerWidth > 860;
+
+  if (root && !reduce) {
+    const lines = root.querySelectorAll('.split .line > span');
+    const label = root.querySelector('[data-svc-fade]');
+    const rules = root.querySelectorAll('.svc__rule');
+    const inners = root.querySelectorAll('.svc__inner');
+
+    gsap.set(lines, { yPercent: 110 });
+    gsap.set(label, { autoAlpha: 0, y: 24 });
+    gsap.set(rules, { scaleX: 0 });
+    gsap.set(inners, { autoAlpha: 0, y: 30 });
+
+    const tl = gsap.timeline({ paused: true, defaults: { ease: 'expo.out', duration: 1.1 } });
+    tl.to(label, { autoAlpha: 1, y: 0, duration: 0.8 })
+      .to(lines, { yPercent: 0, stagger: 0.12 }, '<0.1')
+      .to(rules, { scaleX: 1, duration: 1.2, stagger: 0.1, ease: 'power3.inOut' }, 0.1)
+      .to(inners, { autoAlpha: 1, y: 0, stagger: 0.1, clearProps: 'transform' }, 0.3);
+    ScrollTrigger.create({ trigger: root, start: 'top 72%', once: true, onEnter: () => tl.play() });
+    window.addEventListener('load', () => ScrollTrigger.refresh());
+  }
+
+  // cursor-following preview image
+  if (root && fine && !reduce) {
+    const preview = root.querySelector<HTMLElement>('.svc-preview')!;
+    const imgs = preview.querySelectorAll<HTMLImageElement>('img');
+    imgs.forEach((im) => { im.loading = 'eager'; });
+    const x = gsap.quickTo(preview, 'x', { duration: 0.6, ease: 'power3' });
+    const y = gsap.quickTo(preview, 'y', { duration: 0.6, ease: 'power3' });
+    const rows = root.querySelectorAll<HTMLElement>('[data-svc-row]');
+    let lastX = 0;
+
+    rows.forEach((row, i) => {
+      row.addEventListener('pointerenter', () => {
+        imgs.forEach((im, j) => im.classList.toggle('is-on', j === i));
+        gsap.to(preview, { autoAlpha: 1, scale: 1, duration: 0.5, ease: 'expo.out', overwrite: 'auto' });
+      });
+    });
+    root.querySelector('.services__list')!.addEventListener('pointerleave', () => {
+      gsap.to(preview, { autoAlpha: 0, scale: 0.9, duration: 0.4, ease: 'power2.out', overwrite: 'auto' });
+    });
+    gsap.set(preview, { scale: 0.9 });
+    root.addEventListener('pointermove', (e) => {
+      x(e.clientX + 40);
+      y(e.clientY);
+      const dx = e.clientX - lastX;
+      lastX = e.clientX;
+      gsap.to(preview, { rotation: gsap.utils.clamp(-6, 6, dx * 0.4), duration: 0.6, ease: 'power3', overwrite: false });
+    }, { passive: true });
+  }
+</script>

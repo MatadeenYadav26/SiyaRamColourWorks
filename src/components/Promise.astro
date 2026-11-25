@@ -1,0 +1,95 @@
+---
+import { promise } from '../content/site';
+// first word of each line fills gold, last word fills blue, the rest fill paper
+const tone = (i: number, n: number) => (i === 0 ? 'gold' : i === n - 1 ? 'blue' : 'paper');
+---
+<section id="promise" class="promise tint-charcoal" aria-labelledby="promise-title">
+  <div class="wrap promise__grid">
+    <p class="label promise__label" data-promise-fade>{promise.label}</p>
+    <h2 id="promise-title" class="promise__lines">
+      {promise.lines.map((line, li) => {
+        const words = line.split(' ');
+        return (
+          <span class={`pl pl--${li + 1}`}>
+            {words.map((w, i) => (
+              <span class="pw">
+                <span class="pw__base">{w}</span>
+                <span class={`pw__fill pw__fill--${tone(i, words.length)}`} aria-hidden="true">{w}</span>
+              </span>
+            ))}
+          </span>
+        );
+      })}
+    </h2>
+  </div>
+</section>
+
+<style>
+  .promise { position: relative; z-index: 3; padding-block: calc(var(--section-y) * 1.2); overflow: hidden; }
+  .promise__grid {
+    display: grid;
+    grid-template-columns: minmax(0, 3fr) minmax(0, 9fr);
+    gap: clamp(32px, 6vw, 112px);
+    align-items: start;
+  }
+  .promise__label { color: rgba(244, 240, 232, 0.6); padding-top: 1.2em; border-top: 1px solid rgba(244, 240, 232, 0.2); }
+  .promise__lines {
+    margin: 0;
+    font-family: var(--serif);
+    font-weight: 400;
+    font-size: clamp(40px, 7.4vw, 128px);
+    line-height: 1.02;
+    letter-spacing: -0.025em;
+  }
+  .pl { display: block; }
+  .pl--2 { padding-left: 1.4em; }
+  .pl--3 { padding-left: 0.6em; }
+  .pl + .pl { margin-top: 0.12em; }
+  .pw { position: relative; display: inline-block; margin-right: 0.24em; }
+  .pw__base { color: rgba(244, 240, 232, 0.16); }
+  .pw__fill { position: absolute; left: 0; top: 0; opacity: 1; }
+  .pw__fill--paper { color: var(--paper); }
+  .pw__fill--gold { color: var(--gold); font-style: italic; }
+  .pw__fill--blue { color: #8EA3E6; } /* brand blue lifted for contrast on charcoal */
+
+  @media (max-width: 860px), (hover: none) {
+    .promise__grid { grid-template-columns: 1fr; gap: 28px; }
+    .promise__lines { font-size: clamp(36px, 10.5vw, 72px); }
+    .pl--2 { padding-left: 0.8em; }
+    .pl--3 { padding-left: 0.3em; }
+  }
+</style>
+
+<script>
+  import { gsap } from 'gsap';
+  import { ScrollTrigger } from 'gsap/ScrollTrigger';
+  gsap.registerPlugin(ScrollTrigger);
+
+  const root = document.getElementById('promise');
+  const reduce = matchMedia('(prefers-reduced-motion: reduce)').matches;
+
+  if (root && !reduce) {
+    const label = root.querySelector('[data-promise-fade]');
+    const fills = root.querySelectorAll('.pw__fill');
+    gsap.set(label, { autoAlpha: 0, y: 24 });
+    gsap.set(fills, { opacity: 0 });
+
+    ScrollTrigger.create({
+      trigger: root, start: 'top 72%', once: true,
+      onEnter: () => gsap.to(label, { autoAlpha: 1, y: 0, duration: 0.8, ease: 'expo.out' }),
+    });
+
+    gsap.to(fills, {
+      opacity: 1,
+      ease: 'none',
+      stagger: 0.5,
+      scrollTrigger: {
+        trigger: root.querySelector('.promise__lines'),
+        start: 'top 78%',
+        end: 'bottom 42%',
+        scrub: 0.6,
+      },
+    });
+    window.addEventListener('load', () => ScrollTrigger.refresh());
+  }
+</script>

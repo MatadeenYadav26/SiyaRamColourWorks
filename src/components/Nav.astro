@@ -1,0 +1,169 @@
+---
+import { site, nav } from '../content/site';
+---
+<header class="nav" id="site-nav" data-nav>
+  <div class="nav__bar">
+    <a class="nav__brand" href="#hero" data-nav-link>
+      <img class="nav__logo" src={site.logo} alt="" width="276" height="160" />
+      <span>{nav.brand}</span>
+    </a>
+
+    <nav class="nav__links" aria-label={nav.aria}>
+      <ul role="list">
+        {nav.links.map((l) => <li><a href={l.href} data-nav-link>{l.label}</a></li>)}
+      </ul>
+      <a class="nav__cta" href={site.whatsapp} target="_blank" rel="noopener">{nav.cta}</a>
+    </nav>
+
+    <button class="nav__toggle" type="button" aria-expanded="false" aria-controls="nav-panel" data-nav-toggle>
+      <span data-open-label>{nav.menu}</span>
+      <span data-close-label hidden>{nav.close}</span>
+    </button>
+  </div>
+
+  <div class="nav__panel" id="nav-panel" hidden>
+    <ul role="list">
+      {nav.links.map((l, i) => (
+        <li><a href={l.href} data-nav-link><span class="nav__num">0{i + 1}</span>{l.label}</a></li>
+      ))}
+    </ul>
+    <a class="nav__panel-cta" href={site.whatsapp} target="_blank" rel="noopener">{nav.cta} — {site.phoneDisplay}</a>
+  </div>
+</header>
+
+<style>
+  .nav {
+    position: fixed; top: 0; left: 0; right: 0;
+    z-index: 50;
+    color: #fffaf0;
+    transition: transform 0.5s var(--ease-expo), background-color 0.4s, color 0.4s, border-color 0.4s;
+    border-bottom: 1px solid transparent;
+  }
+  .nav.is-solid { background: var(--paper); color: var(--ink); border-bottom-color: rgba(27, 27, 27, 0.12); }
+  .nav.is-hidden { transform: translateY(-100%); }
+
+  .nav__bar {
+    max-width: var(--max); margin: 0 auto;
+    display: flex; align-items: center; justify-content: space-between; gap: 24px;
+    padding: clamp(14px, 1.6vw, 22px) var(--gutter);
+  }
+  .nav a { color: inherit; text-decoration: none; }
+  .nav__brand {
+    font-family: var(--serif); font-style: italic; font-weight: 400;
+    font-size: clamp(20px, 1.7vw, 26px); letter-spacing: -0.01em; line-height: 1;
+    display: inline-flex; align-items: center; gap: 10px;
+  }
+  .nav__logo { height: clamp(30px, 2.6vw, 38px); width: auto; display: block; transition: filter 0.4s; }
+  .nav:not(.is-solid):not(.is-open) .nav__logo { filter: brightness(0) invert(1) drop-shadow(0 1px 8px rgba(0, 0, 0, 0.45)); }
+  .nav:not(.is-solid) .nav__brand,
+  .nav:not(.is-solid) .nav__links a,
+  .nav:not(.is-solid) .nav__toggle { text-shadow: 0 1px 12px rgba(0, 0, 0, 0.45); }
+
+  .nav__links { display: flex; align-items: center; gap: clamp(20px, 2.6vw, 44px); }
+  .nav__links ul { list-style: none; margin: 0; padding: 0; display: flex; gap: clamp(18px, 2.2vw, 36px); }
+  .nav__links a, .nav__toggle {
+    position: relative;
+    font-family: var(--sans); font-size: var(--fs-label); font-weight: 600;
+    letter-spacing: 0.1em; text-transform: uppercase;
+    padding-block: 6px;
+  }
+  .nav__links a::after {
+    content: ''; position: absolute; left: 0; right: 0; bottom: 0; height: 1px;
+    background: var(--gold);
+    transform: scaleX(0); transform-origin: left center;
+    transition: transform 0.45s var(--ease-out);
+  }
+  .nav__links a:hover::after, .nav__links a:focus-visible::after, .nav__links a.is-active::after { transform: scaleX(1); }
+  .nav__cta { padding-left: clamp(16px, 2vw, 28px) !important; border-left: 1px solid currentColor; border-left-color: color-mix(in srgb, currentColor 30%, transparent); }
+
+  .nav__toggle { display: none; background: none; border: 0; color: inherit; cursor: pointer; }
+
+  .nav__panel {
+    background: var(--paper); color: var(--ink);
+    border-top: 1px solid rgba(27, 27, 27, 0.12);
+    border-bottom: 1px solid rgba(27, 27, 27, 0.12);
+    padding: 12px var(--gutter) 28px;
+  }
+  .nav__panel ul { list-style: none; margin: 0; padding: 0; }
+  .nav__panel li a {
+    display: flex; align-items: baseline; gap: 14px;
+    font-family: var(--serif); font-size: clamp(30px, 8vw, 44px); line-height: 1.1;
+    padding: 12px 0; border-bottom: 1px solid rgba(27, 27, 27, 0.12);
+  }
+  .nav__num { font-family: var(--sans); font-size: var(--fs-label); color: var(--muted); letter-spacing: 0.08em; }
+  .nav__panel-cta { display: inline-block; margin-top: 20px; font-size: 14px; font-weight: 600; color: var(--blue) !important; }
+
+  @media (max-width: 860px), (hover: none) {
+    .nav__links { display: none; }
+    .nav__toggle { display: inline-block; }
+    .nav.is-open { background: var(--paper); color: var(--ink); }
+    .nav.is-open .nav__brand, .nav.is-open .nav__toggle { text-shadow: none; }
+  }
+  @media (prefers-reduced-motion: reduce) {
+    .nav, .nav__links a::after, .nav__logo { transition: none; }
+  }
+</style>
+
+<script>
+  const navEl = document.querySelector<HTMLElement>('[data-nav]');
+  const hero = document.getElementById('hero');
+
+  if (navEl) {
+    const toggle = navEl.querySelector<HTMLButtonElement>('[data-nav-toggle]')!;
+    const panel = navEl.querySelector<HTMLElement>('#nav-panel')!;
+    const openLbl = toggle.querySelector<HTMLElement>('[data-open-label]')!;
+    const closeLbl = toggle.querySelector<HTMLElement>('[data-close-label]')!;
+
+    const setOpen = (open: boolean) => {
+      navEl.classList.toggle('is-open', open);
+      panel.hidden = !open;
+      toggle.setAttribute('aria-expanded', String(open));
+      openLbl.hidden = open;
+      closeLbl.hidden = !open;
+    };
+    toggle.addEventListener('click', () => setOpen(panel.hidden));
+    document.addEventListener('keydown', (e) => { if (e.key === 'Escape') setOpen(false); });
+
+    // Smooth jump to sections (Lenis on desktop, native on touch)
+    navEl.querySelectorAll<HTMLAnchorElement>('[data-nav-link]').forEach((a) => {
+      a.addEventListener('click', (e) => {
+        const id = a.getAttribute('href');
+        const target = id ? document.querySelector<HTMLElement>(id) : null;
+        if (!target) return;
+        e.preventDefault();
+        setOpen(false);
+        const lenis = (window as any).__lenis;
+        if (lenis) lenis.scrollTo(target, { offset: 0, duration: 1.4 });
+        else target.scrollIntoView({ behavior: 'smooth' });
+        history.replaceState(null, '', id);
+      });
+    });
+
+    // Solid after the hero; hide on scroll down, show on scroll up
+    let lastY = window.scrollY;
+    const onScroll = () => {
+      const y = window.scrollY;
+      const heroEnd = hero ? hero.offsetTop + hero.offsetHeight - navEl.offsetHeight : 0;
+      navEl.classList.toggle('is-solid', y > heroEnd);
+      if (!navEl.classList.contains('is-open')) {
+        const goingDown = y > lastY + 4;
+        const goingUp = y < lastY - 4;
+        if (goingDown && y > 200) navEl.classList.add('is-hidden');
+        else if (goingUp || y < 200) navEl.classList.remove('is-hidden');
+      }
+      lastY = y;
+    };
+    window.addEventListener('scroll', onScroll, { passive: true });
+    onScroll();
+
+    // Active link highlight
+    const links = [...navEl.querySelectorAll<HTMLAnchorElement>('.nav__links a[data-nav-link]')];
+    const io = new IntersectionObserver((entries) => {
+      entries.forEach((en) => {
+        if (!en.isIntersecting) return;
+        links.forEach((l) => l.classList.toggle('is-active', l.getAttribute('href') === `#${en.target.id}`));
+      });
+    }, { rootMargin: '-45% 0px -50% 0px' });
+    links.forEach((l) => { const t = document.querySelector(l.getAttribute('href')!); if (t) io.observe(t); });
+  }
+</script>

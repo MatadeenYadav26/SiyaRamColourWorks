@@ -1,0 +1,152 @@
+---
+import { intro } from '../content/site';
+---
+
+<section id="intro" class="intro tint-limewash" aria-labelledby="intro-title">
+  <div class="wrap intro__grid">
+    <div class="intro__text" data-intro-text>
+      <p class="label intro__label" data-intro-fade>{intro.label}</p>
+      <h2 id="intro-title" class="intro__title split">
+        <span class="line"><span>{intro.heading.pre} <em>{intro.heading.em}</em>{intro.heading.end}</span></span>
+      </h2>
+      <div class="intro__actions" data-intro-fade>
+        <a class="intro__btn" href={intro.cta.href}>{intro.cta.label} <span aria-hidden="true">→</span></a>
+        <a class="intro__link" href={intro.link.href}>{intro.link.label} <span aria-hidden="true">↗</span></a>
+      </div>
+    </div>
+
+    <div class="intro__art" data-intro-art>
+      <div class="intro__stage">
+        <div class="intro__logo-motion" data-intro-logo-motion>
+          <div class="intro__logo" data-intro-logo>
+            <img src={intro.logo} alt={intro.art} width="1200" height="661" decoding="async" loading="lazy" />
+            <span class="intro__sheen" aria-hidden="true" style={`--logo-mask: url(${intro.logo})`}>
+              <span class="intro__sheen-beam" data-intro-sheen></span>
+            </span>
+          </div>
+        </div>
+      </div>
+      <span class="intro__shadow" data-intro-shadow aria-hidden="true"></span>
+      <span class="intro__bar" data-intro-bar aria-hidden="true"></span>
+    </div>
+  </div>
+</section>
+
+<style>
+  .intro { position: relative; z-index: 3; padding-block: var(--section-y); overflow: hidden; }
+  .intro__grid { display: grid; grid-template-columns: minmax(0, 5fr) minmax(0, 6fr); gap: clamp(32px, 6vw, 112px); align-items: center; }
+  .intro__label { display: inline-flex; align-items: center; gap: 10px; margin: 0 0 clamp(18px, 2vw, 28px); }
+  .intro__label::before { content: ''; width: 6px; height: 6px; border-radius: 50%; background: var(--gold); }
+  .intro__title { font-family: var(--serif); font-weight: 500; font-size: clamp(40px, 5.2vw, 84px); line-height: 1; letter-spacing: -0.02em; color: var(--ink); margin: 0; }
+  .intro__title .line { display: block; }
+  .intro__title .line > span { display: inline; }
+  .intro__title em { font-style: italic; color: var(--blue); }
+  .intro__actions { display: flex; flex-wrap: wrap; align-items: center; gap: 14px 28px; margin-top: clamp(28px, 3vw, 40px); }
+  .intro__btn { display: inline-flex; align-items: center; gap: 10px; padding: 16px 24px; background: var(--ink); color: var(--paper); font-weight: 600; font-size: 15px; letter-spacing: .01em; border-radius: var(--radius); text-decoration: none; transition: background-color .3s; }
+  .intro__btn span { transition: transform .3s; }
+  .intro__btn:hover { background: var(--blue); }
+  .intro__btn:hover span { transform: translateX(4px); }
+  .intro__btn:focus-visible, .intro__link:focus-visible { outline: 2px solid var(--blue); outline-offset: 3px; }
+  .intro__link { color: var(--ink); font-weight: 600; font-size: 15px; text-decoration: underline; text-decoration-thickness: 1px; text-underline-offset: 6px; }
+  .intro__link:hover { color: var(--blue); }
+  .intro__art { position: relative; display: grid; justify-items: center; gap: clamp(14px, 1.8vw, 24px); }
+  .intro__stage { width: min(100%, 540px); perspective: 1000px; }
+  .intro__logo-motion { will-change: transform; transform-style: preserve-3d; }
+  .intro__logo { position: relative; width: 100%; will-change: clip-path, transform, opacity; }
+  .intro__logo img {
+    display: block; width: 100%; height: auto;
+    filter: drop-shadow(0 16px 28px rgba(27, 27, 27, 0.14));
+  }
+  .intro__sheen {
+    position: absolute; inset: 0; pointer-events: none; overflow: hidden;
+    -webkit-mask: var(--logo-mask) center / contain no-repeat;
+    mask: var(--logo-mask) center / contain no-repeat;
+  }
+  .intro__sheen-beam {
+    display: block; position: absolute; inset: -30% -50%;
+    background: linear-gradient(
+      110deg,
+      transparent 38%,
+      rgba(255, 248, 224, 0.5) 48%,
+      rgba(224, 165, 38, 0.42) 52%,
+      transparent 62%
+    );
+    will-change: transform;
+  }
+  .intro__shadow {
+    display: block; width: min(68%, 320px); height: 14px;
+    border-radius: 50%;
+    background: radial-gradient(closest-side, rgba(27, 27, 27, 0.22), transparent);
+    filter: blur(4px);
+    will-change: transform, opacity;
+  }
+  .intro__bar { display: block; width: min(60%, 240px); height: 3px; background: var(--gold); transform-origin: left center; will-change: transform; }
+  @media (max-width: 860px) {
+    .intro__grid { grid-template-columns: 1fr; }
+    .intro__art { max-width: 520px; width: 100%; margin-inline: auto; }
+    .intro__stage { width: min(94%, 420px); }
+  }
+  @media (prefers-reduced-motion: reduce) {
+    .intro__sheen { display: none; }
+  }
+</style>
+
+<script>
+  import { gsap } from 'gsap';
+  import { ScrollTrigger } from 'gsap/ScrollTrigger';
+  gsap.registerPlugin(ScrollTrigger);
+
+  const root = document.querySelector<HTMLElement>('#intro');
+  const reduce = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+
+  if (root && !reduce) {
+    const q = (s: string) => root.querySelectorAll(s);
+    const lines = q('.intro__title .line > span');
+    const fades = q('[data-intro-fade]');
+    const art = root.querySelector('[data-intro-art]');
+    const logoReveal = root.querySelector('[data-intro-logo]');
+    const logoMotion = root.querySelector('[data-intro-logo-motion]');
+    const sheen = root.querySelector('[data-intro-sheen]');
+    const shadow = root.querySelector('[data-intro-shadow]');
+    const bar = root.querySelector('[data-intro-bar]');
+    const text = root.querySelector('[data-intro-text]');
+
+    // (a) Text entry — scrubbed as the section enters.
+    gsap.timeline({ defaults: { ease: 'none' }, scrollTrigger: { trigger: root, start: 'top 85%', end: 'top 25%', scrub: 0.8 } })
+      .fromTo(lines, { yPercent: 110 }, { yPercent: 0, duration: 0.6 }, 0.1)
+      .fromTo(fades, { autoAlpha: 0, y: 24 }, { autoAlpha: 1, y: 0, duration: 0.5, stagger: 0.15 }, 0.2);
+
+    // (b) Logo unveil — triggered by the logo container itself so mobile & desktop both scrub in view.
+    gsap.timeline({ defaults: { ease: 'none' }, scrollTrigger: { trigger: art, start: 'top 92%', end: 'center 54%', scrub: 0.65 } })
+      .fromTo(
+        logoReveal,
+        { clipPath: 'inset(0% 100% 0% 0%)', scale: 0.88, autoAlpha: 0.15 },
+        { clipPath: 'inset(0% 0% 0% 0%)', scale: 1, autoAlpha: 1, duration: 1 },
+        0
+      )
+      .fromTo(bar, { scaleX: 0 }, { scaleX: 1, duration: 0.55 }, 0.45);
+
+    // (c) Continuous 3D scroll choreography while the logo passes through the viewport.
+    const pass = { trigger: art, start: 'top bottom', end: 'bottom top', scrub: 0.55 };
+    gsap.timeline({ defaults: { ease: 'none' }, scrollTrigger: pass })
+      .fromTo(
+        logoMotion,
+        { y: 52, rotateX: 10, rotateY: -12, rotateZ: -4, scale: 0.92 },
+        { y: 0, rotateX: 0, rotateY: 0, rotateZ: 0, scale: 1.04, duration: 0.5 }
+      )
+      .to(
+        logoMotion,
+        { y: -52, rotateX: -8, rotateY: 12, rotateZ: 3.5, scale: 0.94, duration: 0.5 }
+      );
+
+    gsap.fromTo(sheen, { xPercent: -115 }, { xPercent: 115, ease: 'none', scrollTrigger: { ...pass } });
+    gsap.timeline({ defaults: { ease: 'none' }, scrollTrigger: { ...pass } })
+      .fromTo(shadow, { x: -16, scaleX: 0.82, autoAlpha: 0.18 }, { x: 0, scaleX: 1.06, autoAlpha: 0.34, duration: 0.5 })
+      .to(shadow, { x: 16, scaleX: 0.84, autoAlpha: 0.16, duration: 0.5 });
+
+    gsap.fromTo(bar, { x: 18 }, { x: -18, ease: 'none', scrollTrigger: { ...pass } });
+    gsap.fromTo(text, { yPercent: 5 }, { yPercent: -5, ease: 'none', scrollTrigger: { trigger: root, start: 'top bottom', end: 'bottom top', scrub: 1 } });
+  }
+
+  window.addEventListener('load', () => ScrollTrigger.refresh());
+</script>

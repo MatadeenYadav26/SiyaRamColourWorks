@@ -1,0 +1,39 @@
+---
+import '../styles/tokens.css';
+import '../styles/global.css';
+import { site } from '../content/site';
+import Grain from '../components/Grain.astro';
+import Cursor from '../components/Cursor.astro';
+import PaintBlobs from '../components/PaintBlobs.astro';
+import WhatsAppFab from '../components/WhatsAppFab.astro';
+import Nav from '../components/Nav.astro';
+const baseUrl = `${import.meta.env.BASE_URL.replace(/\/$/, '')}/`;
+---
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>{site.title}</title>
+    <meta name="description" content={site.description} />
+    <meta name="theme-color" content="#F4F0E8" />
+    <link rel="icon" type="image/png" href={`${baseUrl}favicon-logo.png`} />
+    <slot name="head" />
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link
+      rel="stylesheet"
+      href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,300..600&family=Manrope:wght@400;500;600;700&family=Montserrat:wght@600;700;800;900&display=swap"
+    />
+  </head>
+  <body>
+    <Grain />
+    <PaintBlobs />
+    <Nav />
+    <main>
+      <slot />
+    </main>
+    <WhatsAppFab />
+    <Cursor />
+  </body>
+</html>

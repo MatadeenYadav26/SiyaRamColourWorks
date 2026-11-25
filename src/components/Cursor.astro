@@ -1,0 +1,83 @@
+<div class="cursor" aria-hidden="true">
+  <svg class="cursor-roller" viewBox="0 0 48 48" width="44" height="44" fill="none" xmlns="http://www.w3.org/2000/svg">
+    <!-- subtle gold paint dab -->
+    <path class="roller-paint" d="M6 15C12 10 24 9 32 13" stroke="#E0A526" stroke-width="4.5" stroke-linecap="round" opacity="0.88" />
+    <!-- roller sleeve -->
+    <rect x="7" y="9" width="23" height="11" rx="3.5" fill="#E0A526" stroke="#1B1B1B" stroke-width="1.8" />
+    <path d="M11 12.5H26" stroke="#FFF4CC" stroke-width="1.5" stroke-linecap="round" opacity="0.8" />
+    <!-- chrome wire frame -->
+    <path d="M30 14.5H34.5C36.2 14.5 37.5 15.8 37.5 17.5V20.5C37.5 22.1 36.2 23.3 34.6 23.5L26 24.7C24.5 24.9 23.5 26.2 23.5 27.6V30" stroke="#1B1B1B" stroke-width="3.6" stroke-linecap="round" stroke-linejoin="round" />
+    <path d="M30 14.5H34.5C36.2 14.5 37.5 15.8 37.5 17.5V20.5C37.5 22.1 36.2 23.3 34.6 23.5L26 24.7C24.5 24.9 23.5 26.2 23.5 27.6V30" stroke="#E5E7EB" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" />
+    <!-- royal blue handle -->
+    <rect x="20" y="29.5" width="7" height="14" rx="3.5" fill="#1F3A8A" stroke="#1B1B1B" stroke-width="1.8" />
+    <circle cx="23.5" cy="40" r="1.2" fill="#F4F0E8" />
+  </svg>
+</div>
+
+<style>
+  .cursor {
+    position: fixed;
+    top: 0;
+    left: 0;
+    z-index: 100;
+    width: 12px;
+    height: 12px;
+    margin: -6px 0 0 -6px;
+    border-radius: 50%;
+    background: var(--ink);
+    pointer-events: none;
+    display: none;
+    place-items: center;
+    transition: width .35s var(--ease-out), height .35s var(--ease-out), margin .35s var(--ease-out), background-color .35s var(--ease-out), transform .25s var(--ease-out);
+  }
+  :global(html.has-cursor) .cursor { display: grid; }
+  .cursor-roller {
+    width: 44px;
+    height: 44px;
+    opacity: 0;
+    transform: scale(0.4) rotate(12deg);
+    transform-origin: 35% 30%;
+    filter: drop-shadow(0 4px 10px rgba(0, 0, 0, 0.28));
+    transition: opacity .25s var(--ease-out), transform .35s var(--ease-expo);
+  }
+  .roller-paint {
+    stroke-dasharray: 32;
+    stroke-dashoffset: 32;
+    transition: stroke-dashoffset .4s var(--ease-out);
+  }
+  .cursor.is-dark {
+    background: var(--gold);
+    box-shadow: 0 0 0 1px rgba(27, 27, 27, 0.25);
+  }
+  .cursor.is-link {
+    width: 40px; height: 40px; margin: -20px 0 0 -20px;
+    background: rgba(31, 58, 138, .25);
+  }
+  .cursor.is-dark.is-link {
+    background: rgba(224, 165, 38, 0.28);
+    box-shadow: inset 0 0 0 1px rgba(224, 165, 38, 0.7);
+  }
+  .cursor.is-paint,
+  .cursor.is-dark.is-paint {
+    width: 48px;
+    height: 48px;
+    margin: -14px 0 0 -14px;
+    background: transparent;
+    box-shadow: none;
+  }
+  .cursor.is-paint .cursor-roller {
+    opacity: 1;
+    transform: scale(1) rotate(-14deg);
+  }
+  .cursor.is-paint .roller-paint {
+    stroke-dashoffset: 0;
+  }
+  .cursor.is-paint.is-dragging .cursor-roller {
+    transform: scale(0.94) rotate(-28deg);
+  }
+</style>
+
+<script>
+  import { initCursor } from '../scripts/cursor';
+  initCursor();
+</script>
