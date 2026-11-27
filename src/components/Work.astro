@@ -37,7 +37,7 @@ const rows = Array.from({ length: rowCount }, (_, r) => all.slice(r * per, (r + 
                 <li class="tile" style={`aspect-ratio: ${it.w} / ${it.h}`}>
                   <figure>
                     <img src={it.src} alt={set === 0 ? it.caption : ''} width={it.w} height={it.h}
-                         loading="lazy" decoding="async" draggable="false" />
+                         loading={set === 0 ? 'eager' : 'lazy'} fetchpriority="low" decoding="async" draggable="false" />
                     <figcaption><span class="tile__no">{String(i + 1).padStart(2, '0')}</span>{it.caption}</figcaption>
                   </figure>
                 </li>
@@ -132,7 +132,8 @@ const rows = Array.from({ length: rowCount }, (_, r) => all.slice(r * per, (r + 
     // reveal
     const lines = root.querySelectorAll('.split .line > span');
     const fades = root.querySelectorAll('[data-work-fade]');
-    const tiles = root.querySelectorAll('.marquee__set:first-child .tile');
+    // phones: photos are never hidden waiting for an animation (they must show even on a slow phone)
+    const tiles = finaleEnabled() ? root.querySelectorAll('.marquee__set:first-child .tile') : [];
     gsap.set(lines, { yPercent: 110 });
     gsap.set(fades, { autoAlpha: 0, y: 24 });
     gsap.set(tiles, { autoAlpha: 0, y: 40 });
@@ -145,7 +146,10 @@ const rows = Array.from({ length: rowCount }, (_, r) => all.slice(r * per, (r + 
       .to(tiles, { autoAlpha: 1, y: 0, stagger: 0.08, clearProps: 'transform' }, 0.3);
     // on desktop the Services finale slides this section in sideways and says when to start
     if (finaleEnabled()) window.addEventListener('work:enter', () => tl.play(), { once: true });
-    else ScrollTrigger.create({ trigger: root, start: 'top 72%', once: true, onEnter: () => tl.play() });
+    else {
+      const io = new IntersectionObserver(([en]) => { if (en.isIntersecting) { tl.play(); io.disconnect(); } }, { rootMargin: '0px 0px -20% 0px' });
+      io.observe(root);
+    }
 
     // marquee rows: auto-scroll (alternating direction), grab & fling on mouse and touch
     const BASE = 40;     // px/s idle speed
