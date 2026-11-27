@@ -32,7 +32,7 @@ p { margin: 0; }
 
 /* headline line mask (motion.ts animates .line > span) */
 .split .line { display: block; overflow: hidden; padding-bottom: 0.08em; margin-bottom: -0.08em; }
-.split .line > span { display: inline-block; will-change: transform; }
+.split .line > span { display: inline-block; }
 
 /* image reveal frame */
 .reveal { position: relative; overflow: hidden; border-radius: var(--image-radius); }

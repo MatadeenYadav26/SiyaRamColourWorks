@@ -24,6 +24,8 @@
   }
   .blob-blue { top: 8%; right: -10%; }
   .blob-gold { bottom: -6%; left: -12%; opacity: .12; }
+  /* phones/tablets: animated blurred layers are expensive on mobile GPUs (iOS especially) and barely visible */
+  @media (hover: none), (pointer: coarse) { .blobs { display: none; } }
 </style>
 
 <script>
@@ -32,7 +34,8 @@
   const reduced = matchMedia('(prefers-reduced-motion: reduce)').matches;
   const blobs = Array.from(document.querySelectorAll<SVGElement>('.blob'));
 
-  if (!reduced && blobs.length) {
+  const touch = matchMedia('(hover: none), (pointer: coarse)').matches;
+  if (!reduced && !touch && blobs.length) {
     // Slow drift + rotation on the inner path (keeps the outer free for parallax/mouse)
     blobs.forEach((b, i) => {
       const p = b.querySelector('path');

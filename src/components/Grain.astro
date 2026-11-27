@@ -18,4 +18,6 @@
     mix-blend-mode: multiply;
   }
   .grain svg { display: block; }
+  /* phones/tablets: a fixed full-screen blend layer makes iOS Safari re-composite every scroll frame */
+  @media (hover: none), (pointer: coarse) { .grain { display: none; } }
 </style>
