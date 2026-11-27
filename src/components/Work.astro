@@ -1,71 +1,102 @@
 ---
 import { work } from '../content/site';
 const sets = [0, 1];
+// Up to 10 photos: one row. More than that: rows of ~8, alternating direction.
+const ROW_SIZE = 8;
+const all = work.items.map((it, i) => ({ it, i }));
+const rowCount = all.length > 10 ? Math.ceil(all.length / ROW_SIZE) : 1;
+const per = Math.ceil(all.length / rowCount);
+const rows = Array.from({ length: rowCount }, (_, r) => all.slice(r * per, (r + 1) * per));
 ---
-<section id="work" class="work tint-linen" aria-labelledby="work-title">
+<section id="work" class="work tint-linen seam" style="--seam-from:#DCD8D1" aria-labelledby="work-title">
   <div class="wrap work__head">
-    <div class="work__side">
-      <p class="label" data-work-fade>{work.label}</p>
+    <div class="work__topline" data-work-fade>
+      <span class="work__eyebrow">{work.eyebrow}</span>
+      <span class="work__rule" aria-hidden="true" data-work-rule></span>
     </div>
-    <h2 id="work-title" class="work__title split">
-      {work.heading.map((l) => (
-        <span class="line"><span>{l}</span></span>
-      ))}
-    </h2>
+    <div class="work__grid">
+      <h2 id="work-title" class="work__title split">
+        {work.heading.map((l) => (
+          <span class="line"><span set:html={l} /></span>
+        ))}
+      </h2>
+      <div class="work__aside" data-work-fade>
+        <p class="work__lead">{work.lead}</p>
+        <p class="work__hint" aria-hidden="true"><span class="work__hint-dot"></span>{work.hint}</p>
+      </div>
+    </div>
   </div>
 
-  <div class="marquee" data-cursor={work.cursor} data-work-marquee>
-    <div class="marquee__track">
-      {sets.map((set) => (
-        <ul class="marquee__set" role="list" aria-hidden={set === 1 ? 'true' : undefined}>
-          {work.items.map((it) => (
-            <li class="tile" style={`aspect-ratio: ${it.w} / ${it.h}`}>
-              <figure>
-                <img src={it.src} alt={set === 0 ? it.caption : ''} width={it.w} height={it.h}
-                     loading="lazy" decoding="async" draggable="false" />
-                <figcaption>{it.caption}</figcaption>
-              </figure>
-            </li>
+  <div class="work__rows">
+    {rows.map((row, r) => (
+      <div class="marquee" data-cursor={work.cursor} data-work-marquee data-dir={r % 2 === 0 ? '-1' : '1'}>
+        <div class="marquee__track">
+          {sets.map((set) => (
+            <ul class="marquee__set" role="list" aria-hidden={set === 1 ? 'true' : undefined}>
+              {row.map(({ it, i }) => (
+                <li class="tile" style={`aspect-ratio: ${it.w} / ${it.h}`}>
+                  <figure>
+                    <img src={it.src} alt={set === 0 ? it.caption : ''} width={it.w} height={it.h}
+                         loading="lazy" decoding="async" draggable="false" />
+                    <figcaption><span class="tile__no">{String(i + 1).padStart(2, '0')}</span>{it.caption}</figcaption>
+                  </figure>
+                </li>
+              ))}
+            </ul>
           ))}
-        </ul>
-      ))}
-    </div>
+        </div>
+      </div>
+    ))}
   </div>
 </section>
 
 <style>
   .work { position: relative; z-index: 3; padding-block: var(--section-y); overflow: hidden; }
-  .work__head {
-    display: grid;
-    grid-template-columns: minmax(0, 3fr) minmax(0, 9fr);
-    gap: clamp(32px, 6vw, 112px);
-    align-items: end;
-    margin-bottom: clamp(40px, 6vw, 88px);
+  .work__head { margin-bottom: clamp(40px, 6vw, 88px); }
+  .work__topline {
+    display: flex; align-items: center; gap: clamp(12px, 1.6vw, 20px);
+    font: 600 var(--fs-label)/1 var(--sans); letter-spacing: .2em; text-transform: uppercase; color: var(--muted);
+    margin-bottom: clamp(28px, 4vw, 56px);
+  }
+  .work__rule { flex: 1; height: 1px; background: rgba(27, 27, 27, .18); transform-origin: left center; }
+  .work__grid {
+    display: grid; grid-template-columns: minmax(0, 8fr) minmax(0, 4fr);
+    gap: clamp(28px, 5vw, 96px); align-items: end;
   }
   .work__title {
-    font-family: var(--serif);
-    font-weight: 500;
-    font-size: var(--fs-h2);
-    line-height: 0.98;
-    letter-spacing: -0.02em;
-    margin: 0;
+    font-family: var(--serif); font-weight: 400;
+    font-size: clamp(48px, 7vw, 120px); line-height: .95; letter-spacing: -0.035em; margin: 0;
   }
   .work__title .line { display: block; }
+  .work__title :global(em) { font-style: italic; color: var(--blue); position: relative; margin-right: .12em; }
+  .work__title .line:nth-child(2) { padding-left: clamp(0px, 8vw, 140px); }
+  .work__lead { font-size: var(--fs-body); line-height: 1.6; color: var(--muted); max-width: 34ch; }
+  .work__hint {
+    display: inline-flex; align-items: center; gap: 10px; margin-top: 22px;
+    font: 600 12px/1 var(--sans); letter-spacing: .18em; text-transform: uppercase; color: var(--ink);
+  }
+  .work__hint-dot { width: 26px; height: 26px; border-radius: 50%; border: 1px solid rgba(27,27,27,.3); position: relative; }
+  .work__hint-dot::before, .work__hint-dot::after {
+    content: ''; position: absolute; top: 50%; width: 5px; height: 5px; margin-top: -3px;
+    border-top: 1.5px solid currentColor; border-left: 1.5px solid currentColor;
+  }
+  .work__hint-dot::before { left: 6px; transform: rotate(-45deg); }
+  .work__hint-dot::after { right: 6px; transform: rotate(135deg); }
 
   .marquee { position: relative; touch-action: pan-y; user-select: none; cursor: grab; }
   .marquee.is-drag { cursor: grabbing; }
   .marquee__track { display: flex; width: max-content; will-change: transform; }
-  .marquee__track.is-touch-loop { animation: work-loop var(--marquee-duration) linear infinite; }
-  .marquee__track.is-touch-loop:not(.is-visible) { animation-play-state: paused; }
-  @keyframes work-loop { to { transform: translate3d(var(--marquee-distance), 0, 0); } }
+  .work__rows { display: grid; gap: clamp(56px, 6vw, 96px); }
+  .work__rows:has(.marquee + .marquee) .tile { height: clamp(220px, 28vw, 400px); }
   .marquee__set { display: flex; gap: clamp(14px, 1.6vw, 24px); list-style: none; margin: 0; padding: 0 clamp(14px, 1.6vw, 24px) 0 0; }
   .tile { height: clamp(260px, 38vw, 520px); flex: none; }
   .tile:nth-child(even) { margin-top: clamp(24px, 4vw, 64px); }
   .tile figure { margin: 0; height: 100%; position: relative; }
   .tile img {
     display: block; width: 100%; height: 100%; object-fit: cover;
-    border-radius: var(--radius); pointer-events: none;
+    border-radius: var(--image-radius); pointer-events: none;
   }
+  .tile__no { font-family: var(--serif); font-style: italic; color: var(--blue); margin-right: 10px; letter-spacing: 0; }
   .tile figcaption {
     position: absolute; left: 0; top: 100%; padding-top: 10px;
     font-size: var(--fs-label); letter-spacing: 0.04em; color: var(--muted);
@@ -75,7 +106,10 @@ const sets = [0, 1];
   .tile:hover figcaption { opacity: 1; transform: none; }
 
   @media (max-width: 860px), (hover: none) {
-    .work__head { grid-template-columns: 1fr; gap: 20px; }
+    .work__grid { grid-template-columns: 1fr; gap: 20px; }
+    .work__title { font-size: clamp(44px, 12vw, 72px); }
+    .work__title .line:nth-child(2) { padding-left: 0; }
+    .work__hint { display: none; }
     .tile { height: clamp(220px, 58vw, 340px); }
     .tile figcaption { opacity: 1; transform: none; }
   }
@@ -88,11 +122,11 @@ const sets = [0, 1];
 <script>
   import { gsap } from 'gsap';
   import { ScrollTrigger } from 'gsap/ScrollTrigger';
+  import { finaleEnabled } from '../scripts/finale';
   gsap.registerPlugin(ScrollTrigger);
 
   const root = document.getElementById('work');
   const reduce = matchMedia('(prefers-reduced-motion: reduce)').matches;
-  const isTouch = matchMedia('(pointer: coarse)').matches || 'ontouchstart' in window;
 
   if (root && !reduce) {
     // reveal
@@ -103,88 +137,73 @@ const sets = [0, 1];
     gsap.set(fades, { autoAlpha: 0, y: 24 });
     gsap.set(tiles, { autoAlpha: 0, y: 40 });
     const tl = gsap.timeline({ paused: true, defaults: { ease: 'expo.out', duration: 1.1 } });
+    const rule = root.querySelector('[data-work-rule]');
+    gsap.set(rule, { scaleX: 0 });
     tl.to(fades, { autoAlpha: 1, y: 0, duration: 0.8, stagger: 0.1 })
+      .to(rule, { scaleX: 1, duration: 1.4 }, 0.1)
       .to(lines, { yPercent: 0, stagger: 0.12 }, '<0.1')
       .to(tiles, { autoAlpha: 1, y: 0, stagger: 0.08, clearProps: 'transform' }, 0.3);
-    ScrollTrigger.create({ trigger: root, start: 'top 72%', once: true, onEnter: () => tl.play() });
+    // on desktop the Services finale slides this section in sideways and says when to start
+    if (finaleEnabled()) window.addEventListener('work:enter', () => tl.play(), { once: true });
+    else ScrollTrigger.create({ trigger: root, start: 'top 72%', once: true, onEnter: () => tl.play() });
 
-    // marquee
-    const box = root.querySelector<HTMLElement>('[data-work-marquee]')!;
-    const track = box.querySelector<HTMLElement>('.marquee__track')!;
-    const firstSet = track.querySelector<HTMLElement>('.marquee__set')!;
-    const BASE = 40;
-    const setWidth = () => firstSet.getBoundingClientRect().width || 1;
-
-    if (isTouch) {
-      track.classList.add('is-touch-loop');
-      const updateLoop = () => {
-        const width = setWidth();
-        track.style.setProperty('--marquee-distance', `${-width}px`);
-        track.style.setProperty('--marquee-duration', `${width / BASE}s`);
-      };
-      const observer = new IntersectionObserver(([entry]) => {
-        track.classList.toggle('is-visible', entry.isIntersecting);
-      });
-      observer.observe(box);
-      updateLoop();
-      window.addEventListener('resize', updateLoop);
-      box.querySelectorAll('img').forEach((im) => im.addEventListener('load', updateLoop, { once: true }));
-    } else {
+    // marquee rows: auto-scroll (alternating direction), grab & fling on mouse and touch
+    const BASE = 40;     // px/s idle speed
+    const DRAG = 1.6;    // drag multiplier: the strip moves faster than the finger
+    root.querySelectorAll<HTMLElement>('[data-work-marquee]').forEach((box) => {
+      const dir = Number(box.dataset.dir || -1);
+      const track = box.querySelector<HTMLElement>('.marquee__track')!;
+      const firstSet = track.querySelector<HTMLElement>('.marquee__set')!;
       const setX = gsap.quickSetter(track, 'x', 'px');
       const speed = { m: 1 };
-      let half = setWidth();
-      let x = 0, vel = 0, dragging = false, lastX = 0, lastT = 0, running = false;
-      const wrap = () => {
-        if (x <= -half || x > 0) x = gsap.utils.wrap(-half, 0, x);
-        return x;
-      };
+      let half = firstSet.getBoundingClientRect().width || 1;
+      let x = dir > 0 ? -half : 0, vel = 0, dragging = false, lastX = 0, lastT = 0, running = false;
+      const wrap = () => (x = gsap.utils.wrap(-half, 0, x));
 
       const tick = (_t: number, dt: number) => {
         const s = Math.min(dt, 64) / 1000;
         if (!dragging) {
-          x -= BASE * speed.m * s;
-          x += vel * s;
+          x += dir * BASE * speed.m * s + vel * s;
           vel *= Math.pow(0.04, s);
           if (Math.abs(vel) < 2) vel = 0;
         }
-        x = wrap();
-        setX(x);
+        wrap(); setX(x);
       };
-
-      const measure = () => {
-        half = setWidth();
-        x = wrap();
-        setX(x);
-      };
+      const measure = () => { half = firstSet.getBoundingClientRect().width || 1; wrap(); setX(x); };
       window.addEventListener('resize', measure);
       window.addEventListener('load', () => { measure(); ScrollTrigger.refresh(); });
       box.querySelectorAll('img').forEach((im) => im.addEventListener('load', measure, { once: true }));
+      measure();
 
-      ScrollTrigger.create({
-        trigger: box, start: 'top bottom', end: 'bottom top',
-        onToggle: (self) => {
-          if (self.isActive && !running) { gsap.ticker.add(tick); running = true; }
-          else if (!self.isActive && running) { gsap.ticker.remove(tick); running = false; }
-        },
-      });
+      // run only while on screen; IntersectionObserver sees the strip's real position,
+      // even while the desktop Services finale is sliding this section in sideways
+      new IntersectionObserver(([en]) => {
+        if (en.isIntersecting && !running) { gsap.ticker.add(tick); running = true; measure(); }
+        else if (!en.isIntersecting && running) { gsap.ticker.remove(tick); running = false; }
+      }).observe(box);
 
-      box.addEventListener('pointerenter', (e) => {
-        if (e.pointerType === 'mouse') gsap.to(speed, { m: 0.25, duration: 0.8, ease: 'power2.out' });
-      });
+      box.addEventListener('pointerenter', (e) => { if (e.pointerType === 'mouse') gsap.to(speed, { m: 0.25, duration: 0.8, ease: 'power2.out' }); });
       box.addEventListener('pointerleave', () => gsap.to(speed, { m: 1, duration: 0.8, ease: 'power2.out' }));
 
+      let startX = 0, startY = 0, decided = false;
       box.addEventListener('pointerdown', (e) => {
-        dragging = true; vel = 0; lastX = e.clientX; lastT = performance.now();
-        box.classList.add('is-drag');
-        box.setPointerCapture(e.pointerId);
+        dragging = true; decided = e.pointerType === 'mouse'; vel = 0;
+        startX = lastX = e.clientX; startY = e.clientY; lastT = performance.now();
+        if (decided) { box.classList.add('is-drag'); box.setPointerCapture(e.pointerId); }
       });
       box.addEventListener('pointermove', (e) => {
         if (!dragging) return;
+        if (!decided) {
+          // touch: only take over once the gesture is clearly horizontal
+          const ax = Math.abs(e.clientX - startX), ay = Math.abs(e.clientY - startY);
+          if (ax < 6 && ay < 6) return;
+          if (ay > ax) { dragging = false; return; }
+          decided = true; box.classList.add('is-drag'); box.setPointerCapture(e.pointerId);
+        }
         const now = performance.now();
-        const dx = e.clientX - lastX;
+        const dx = (e.clientX - lastX) * DRAG;
         x += dx;
-        const dt = Math.max(now - lastT, 1);
-        vel = gsap.utils.clamp(-3000, 3000, (dx / dt) * 1000);
+        vel = gsap.utils.clamp(-4000, 4000, (dx / Math.max(now - lastT, 1)) * 1000);
         lastX = e.clientX; lastT = now;
       });
       const end = (e: PointerEvent) => {
@@ -196,6 +215,6 @@ const sets = [0, 1];
       };
       box.addEventListener('pointerup', end);
       box.addEventListener('pointercancel', end);
-    }
+    });
   }
 </script>

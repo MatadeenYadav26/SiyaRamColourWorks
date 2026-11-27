@@ -1,63 +1,112 @@
 ---
 import { promise } from '../content/site';
-// first word of each line fills gold, last word fills blue, the rest fill paper
-const tone = (i: number, n: number) => (i === 0 ? 'gold' : i === n - 1 ? 'blue' : 'paper');
+const total = String(promise.items.length).padStart(2, '0');
 ---
-<section id="promise" class="promise tint-charcoal" aria-labelledby="promise-title">
-  <div class="wrap promise__grid">
-    <p class="label promise__label" data-promise-fade>{promise.label}</p>
-    <h2 id="promise-title" class="promise__lines">
-      {promise.lines.map((line, li) => {
-        const words = line.split(' ');
-        return (
-          <span class={`pl pl--${li + 1}`}>
-            {words.map((w, i) => (
-              <span class="pw">
-                <span class="pw__base">{w}</span>
-                <span class={`pw__fill pw__fill--${tone(i, words.length)}`} aria-hidden="true">{w}</span>
-              </span>
+<section id="promise" class="promise tint-charcoal seam seam--drip" style="--seam-from:#E7DFCF" aria-labelledby="promise-title">
+  <div class="wrap">
+    <p class="label promise__label" data-p-fade>{promise.label}</p>
+
+    <div class="promise__stage">
+      <h2 id="promise-title" class="promise__lead" data-p-fade>{promise.lead}</h2>
+
+      <!-- Kinetic promise: one phrase at a time, letters roll in and out -->
+      <div class="promise__rot" data-p-rot aria-hidden="true">
+        {promise.items.map((it, i) => (
+          <p class={`promise__phrase${i === 0 ? ' is-on' : ''}`} data-p-phrase>{it.title}</p>
+        ))}
+      </div>
+      <ul class="sr-only">
+        {promise.items.map((it) => <li>{it.title} {it.text}</li>)}
+      </ul>
+
+      <div class="promise__foot" aria-hidden="true">
+        <div class="promise__notes">
+          {promise.items.map((it, i) => (
+            <p class={`promise__note${i === 0 ? ' is-on' : ''}`} data-p-note>{it.text}</p>
+          ))}
+        </div>
+        <div class="promise__nav">
+          <span class="promise__count"><b data-p-num>01</b> / {total}</span>
+          <div class="promise__dots">
+            {promise.items.map((_, i) => (
+              <button type="button" class="promise__dot" data-p-dot={i} tabindex="-1"><span></span></button>
             ))}
-          </span>
-        );
-      })}
-    </h2>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="promise__motto">
+      <p class="promise__big" aria-label={`${promise.motto.pre} ${promise.motto.em}${promise.motto.end}`}>
+        <span class="promise__big-outline" aria-hidden="true">{promise.motto.pre} <em>{promise.motto.em}</em>{promise.motto.end}</span>
+        <span class="promise__big-fill" aria-hidden="true" data-p-fill>{promise.motto.pre} <em>{promise.motto.em}</em>{promise.motto.end}</span>
+      </p>
+      <p class="promise__sign" data-p-sign><span aria-hidden="true"></span>{promise.sign}</p>
+    </div>
   </div>
 </section>
 
 <style>
-  .promise { position: relative; z-index: 3; padding-block: calc(var(--section-y) * 1.2); overflow: hidden; }
-  .promise__grid {
-    display: grid;
-    grid-template-columns: minmax(0, 3fr) minmax(0, 9fr);
-    gap: clamp(32px, 6vw, 112px);
-    align-items: start;
-  }
-  .promise__label { color: rgba(244, 240, 232, 0.6); padding-top: 1.2em; border-top: 1px solid rgba(244, 240, 232, 0.2); }
-  .promise__lines {
-    margin: 0;
-    font-family: var(--serif);
-    font-weight: 400;
-    font-size: clamp(40px, 7.4vw, 128px);
-    line-height: 1.02;
-    letter-spacing: -0.025em;
-  }
-  .pl { display: block; }
-  .pl--2 { padding-left: 1.4em; }
-  .pl--3 { padding-left: 0.6em; }
-  .pl + .pl { margin-top: 0.12em; }
-  .pw { position: relative; display: inline-block; margin-right: 0.24em; }
-  .pw__base { color: rgba(244, 240, 232, 0.16); }
-  .pw__fill { position: absolute; left: 0; top: 0; opacity: 1; }
-  .pw__fill--paper { color: var(--paper); }
-  .pw__fill--gold { color: var(--gold); font-style: italic; }
-  .pw__fill--blue { color: #8EA3E6; } /* brand blue lifted for contrast on charcoal */
+  .promise { position: relative; z-index: 3; padding-block: var(--section-y); overflow: hidden; }
+  .promise__label { display: inline-block; color: rgba(244, 240, 232, .6); padding-top: 1.2em; border-top: 1px solid rgba(244, 240, 232, .2); }
 
-  @media (max-width: 860px), (hover: none) {
-    .promise__grid { grid-template-columns: 1fr; gap: 28px; }
-    .promise__lines { font-size: clamp(36px, 10.5vw, 72px); }
-    .pl--2 { padding-left: 0.8em; }
-    .pl--3 { padding-left: 0.3em; }
+  .promise__stage { margin-top: clamp(40px, 6vw, 80px); }
+  .promise__lead {
+    margin: 0; max-width: 22ch;
+    font-family: var(--serif); font-weight: 400; color: rgba(244, 240, 232, .72);
+    font-size: clamp(26px, 2.8vw, 44px); line-height: 1.15; letter-spacing: -0.015em;
   }
+  .promise__rot { position: relative; margin-top: clamp(10px, 1.4vw, 20px); }
+  .promise__phrase {
+    margin: 0; font-family: var(--serif); font-style: italic; font-weight: 400; color: var(--gold);
+    font-size: clamp(52px, 10vw, 168px); line-height: 1; letter-spacing: -0.04em;
+    position: absolute; left: 0; top: 0; right: 0; visibility: hidden;
+  }
+  .promise__phrase.is-on { position: relative; visibility: visible; }
+  .promise__phrase :global(.ch) { display: inline-block; will-change: transform, opacity; }
+  .promise__phrase :global(.wd) { display: inline-block; white-space: nowrap; }
+
+  .promise__foot {
+    display: flex; flex-wrap: wrap; align-items: end; justify-content: space-between; gap: 24px 48px;
+    margin-top: clamp(24px, 3vw, 44px); padding-top: clamp(20px, 2vw, 28px); border-top: 1px solid rgba(244, 240, 232, .14);
+  }
+  .promise__notes { position: relative; flex: 1 1 340px; min-height: 3.2em; }
+  .promise__note {
+    position: absolute; inset: 0 auto auto 0; max-width: 46ch; margin: 0;
+    font-size: var(--fs-lead); line-height: 1.5; color: rgba(244, 240, 232, .72);
+    opacity: 0; transform: translateY(10px); transition: opacity .5s var(--ease-out), transform .6s var(--ease-expo);
+  }
+  .promise__note.is-on { position: relative; opacity: 1; transform: none; }
+  .promise__nav { display: flex; align-items: center; gap: 22px; }
+  .promise__count { font: 600 12px/1 var(--sans); letter-spacing: .2em; color: rgba(244, 240, 232, .5); }
+  .promise__count b { font-family: var(--serif); font-weight: 400; font-size: 22px; letter-spacing: 0; color: var(--paper); }
+  .promise__dots { display: flex; gap: 8px; }
+  .promise__dot { width: 44px; height: 24px; padding: 0; border: 0; background: none; display: grid; align-items: center; }
+  .promise__dot span { display: block; height: 2px; background: rgba(244, 240, 232, .2); position: relative; overflow: hidden; border-radius: 2px; }
+  .promise__dot span::after { content: ''; position: absolute; inset: 0; background: var(--gold); transform: scaleX(var(--p, 0)); transform-origin: left; }
+
+  .promise__motto { margin-top: clamp(96px, 12vw, 180px); }
+  .promise__big {
+    position: relative; margin: 0;
+    font-family: var(--serif); font-weight: 400; white-space: nowrap;
+    font-size: clamp(44px, 10.4vw, 176px); line-height: 1; letter-spacing: -0.04em;
+  }
+  .promise__big em { font-style: italic; }
+  .promise__big-outline { display: block; color: transparent; -webkit-text-stroke: 1px rgba(244, 240, 232, .32); }
+  .promise__big-fill { position: absolute; inset: 0; display: block; color: var(--paper); clip-path: inset(0 100% 0 0); }
+  .promise__big-fill em { color: var(--gold); }
+  .promise__sign {
+    display: flex; align-items: center; gap: 14px; margin-top: clamp(20px, 2vw, 32px);
+    font: 600 12px/1 var(--sans); letter-spacing: .2em; text-transform: uppercase; color: rgba(244, 240, 232, .55);
+  }
+  .promise__sign span { width: 40px; height: 1px; background: var(--gold); }
+
+  @media (max-width: 860px) {
+    .promise__phrase { font-size: clamp(48px, 14vw, 90px); line-height: 1.02; }
+    .promise__big { white-space: normal; font-size: clamp(48px, 14vw, 90px); line-height: 1.02; }
+    .promise__dot { width: 30px; }
+  }
+  @media (prefers-reduced-motion: reduce) { .promise__big-fill { clip-path: none; } }
 </style>
 
 <script>
@@ -68,28 +117,83 @@ const tone = (i: number, n: number) => (i === 0 ? 'gold' : i === n - 1 ? 'blue' 
   const root = document.getElementById('promise');
   const reduce = matchMedia('(prefers-reduced-motion: reduce)').matches;
 
-  if (root && !reduce) {
-    const label = root.querySelector('[data-promise-fade]');
-    const fills = root.querySelectorAll('.pw__fill');
-    gsap.set(label, { autoAlpha: 0, y: 24 });
-    gsap.set(fills, { opacity: 0 });
+  if (root) {
+    const phrases = Array.from(root.querySelectorAll<HTMLElement>('[data-p-phrase]'));
+    const notes = Array.from(root.querySelectorAll<HTMLElement>('[data-p-note]'));
+    const dots = Array.from(root.querySelectorAll<HTMLElement>('[data-p-dot]'));
+    const num = root.querySelector<HTMLElement>('[data-p-num]')!;
+    const rot = root.querySelector<HTMLElement>('[data-p-rot]')!;
+    const n = phrases.length;
+    const HOLD = 3.2; // seconds each promise stays
 
-    ScrollTrigger.create({
-      trigger: root, start: 'top 72%', once: true,
-      onEnter: () => gsap.to(label, { autoAlpha: 1, y: 0, duration: 0.8, ease: 'expo.out' }),
+    // split each phrase into words > letters
+    phrases.forEach((p) => {
+      p.innerHTML = p.textContent!.split(' ')
+        .map((w) => `<span class="wd">${[...w].map((c) => `<span class="ch">${c}</span>`).join('')}</span>`)
+        .join(' ');
     });
+    // reserve the height of the tallest phrase so the layout never jumps
+    const fit = () => {
+      let h = 0;
+      phrases.forEach((p) => { p.style.position = 'relative'; p.style.visibility = 'hidden'; h = Math.max(h, p.offsetHeight); p.style.position = ''; p.style.visibility = ''; });
+      rot.style.minHeight = `${h}px`;
+    };
+    fit();
+    window.addEventListener('resize', fit);
+    document.fonts?.ready.then(fit);
 
-    gsap.to(fills, {
-      opacity: 1,
-      ease: 'none',
-      stagger: 0.5,
-      scrollTrigger: {
-        trigger: root.querySelector('.promise__lines'),
-        start: 'top 78%',
-        end: 'bottom 42%',
-        scrub: 0.6,
+    let cur = 0, prog: gsap.core.Tween | null = null, started = false;
+    const setDot = (i: number, v: number) => dots[i]?.style.setProperty('--p', String(v));
+
+    function show(next: number) {
+      next = (next + n) % n;
+      const out = phrases[cur], inn = phrases[next];
+      const outCh = out.querySelectorAll('.ch'), inCh = inn.querySelectorAll('.ch');
+      notes[cur].classList.remove('is-on'); notes[next].classList.add('is-on');
+      dots.forEach((_, i) => setDot(i, i < next ? 1 : 0));
+      num.textContent = String(next + 1).padStart(2, '0');
+      if (reduce) { out.classList.remove('is-on'); inn.classList.add('is-on'); cur = next; return; }
+      gsap.timeline()
+        .to(outCh, { yPercent: -110, rotate: -8, autoAlpha: 0, duration: 0.45, ease: 'power3.in', stagger: 0.015 })
+        .add(() => { out.classList.remove('is-on'); inn.classList.add('is-on'); })
+        .fromTo(inCh, { yPercent: 110, rotate: 8, autoAlpha: 0 }, { yPercent: 0, rotate: 0, autoAlpha: 1, duration: 0.8, ease: 'expo.out', stagger: 0.022 });
+      cur = next;
+      run();
+    }
+    function run() {
+      prog?.kill();
+      const o = { v: 0 };
+      prog = gsap.to(o, { v: 1, duration: HOLD, ease: 'none', onUpdate: () => setDot(cur, o.v), onComplete: () => show(cur + 1) });
+    }
+    dots.forEach((d, i) => d.addEventListener('click', () => { if (i !== cur) show(i); }));
+
+    // only cycle while the section is on screen
+    ScrollTrigger.create({
+      trigger: root.querySelector('.promise__stage'), start: 'top 75%', end: 'bottom top',
+      onToggle: (self) => {
+        if (self.isActive) {
+          if (!started) {
+            started = true;
+            if (!reduce) gsap.fromTo(phrases[0].querySelectorAll('.ch'), { yPercent: 110, rotate: 8, autoAlpha: 0 }, { yPercent: 0, rotate: 0, autoAlpha: 1, duration: 0.9, ease: 'expo.out', stagger: 0.025 });
+          }
+          run();
+        } else prog?.pause();
       },
     });
-    window.addEventListener('load', () => ScrollTrigger.refresh());
+
+    if (!reduce) {
+      const fades = root.querySelectorAll('[data-p-fade]');
+      gsap.set(fades, { autoAlpha: 0, y: 20 });
+      ScrollTrigger.create({ trigger: root, start: 'top 72%', once: true, onEnter: () => gsap.to(fades, { autoAlpha: 1, y: 0, duration: 0.9, stagger: 0.12, ease: 'expo.out' }) });
+
+      const fill = root.querySelector('[data-p-fill]');
+      const motto = root.querySelector('.promise__motto');
+      gsap.fromTo(fill, { clipPath: 'inset(0 100% 0 0)' }, { clipPath: 'inset(0 0% 0 0)', ease: 'none', scrollTrigger: { trigger: motto, start: 'top 85%', end: 'top 35%', scrub: 0.6 } });
+      const sign = root.querySelector('[data-p-sign]');
+      gsap.set(sign, { autoAlpha: 0, y: 16 });
+      ScrollTrigger.create({ trigger: motto, start: 'top 50%', once: true, onEnter: () => gsap.to(sign, { autoAlpha: 1, y: 0, duration: 0.8, ease: 'expo.out' }) });
+    }
   }
+
+  window.addEventListener('load', () => ScrollTrigger.refresh());
 </script>

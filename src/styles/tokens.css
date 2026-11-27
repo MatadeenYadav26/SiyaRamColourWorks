@@ -13,7 +13,7 @@
   /* type */
   --serif: 'Fraunces', Georgia, 'Times New Roman', serif;
   --sans: 'Manrope', system-ui, -apple-system, 'Segoe UI', sans-serif;
-  --fs-label: clamp(11px, 0.9vw, 13px);
+  --fs-label: clamp(12px, 0.9vw, 13px);
   --fs-body: clamp(16px, 1.15vw, 18px);
   --fs-lead: clamp(18px, 1.6vw, 22px);
   --fs-h2: clamp(40px, 6.4vw, 104px);
@@ -22,6 +22,7 @@
   --gutter: clamp(20px, 5vw, 80px);
   --section-y: clamp(96px, 14vw, 200px);
   --radius: 4px;
+  --image-radius: 8px;
   --max: 1440px;
 
   /* motion */

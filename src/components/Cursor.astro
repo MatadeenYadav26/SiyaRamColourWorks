@@ -72,6 +72,12 @@
   .cursor.is-paint .roller-paint {
     stroke-dashoffset: 0;
   }
+  :global(.cursor-dab) {
+    position: fixed; z-index: 99; width: 34px; height: 34px; margin: -17px 0 0 -17px; pointer-events: none;
+    border-radius: 46% 54% 50% 50% / 55% 45% 55% 45%;
+    background: radial-gradient(circle at 40% 40%, rgba(224, 165, 38, .9), rgba(224, 165, 38, .35) 60%, transparent 70%);
+  }
+  .cursor.is-typing { opacity: 0 !important; }
   .cursor.is-paint.is-dragging .cursor-roller {
     transform: scale(0.94) rotate(-28deg);
   }

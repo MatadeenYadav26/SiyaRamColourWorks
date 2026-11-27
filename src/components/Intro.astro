@@ -1,94 +1,250 @@
 ---
+// Page 1 — illustrated logo-house + working fan deck. Everything except text is inline SVG/CSS.
 import { intro } from '../content/site';
+const n = intro.chips.length;
+const start = 0; // Mustard Yellow
+
+// Flowing paint edge: a periodic wave twice the viewBox width, slid sideways while scrolling.
+const P = 360, A = 15, Y = 44, SPAN = 2880;
+const wave = (y: number) => {
+  let d = `M0 ${y} Q${P / 4} ${y - A} ${P / 2} ${y}`;
+  for (let x = P / 2; x < SPAN; x += P / 2) d += ` T${x + P / 2} ${y}`;
+  return d;
+};
+const fill = `${wave(Y)} V100 H0 Z`;
 ---
 
-<section id="intro" class="intro tint-limewash" aria-labelledby="intro-title">
+<section id="intro" class="intro" aria-labelledby="intro-title">
+  <!-- Painted top edge: rises over the hero; gold + blue lines echo the ribbons from the animation -->
+  <svg class="intro__edge" viewBox="0 0 1440 100" preserveAspectRatio="none" aria-hidden="true">
+    <g data-wave>
+      <path class="intro__wave-fill" d={fill} />
+      <path class="intro__wave-line intro__wave-line--blue" d={wave(Y + 14)} pathLength="1" data-wave-line />
+      <path class="intro__wave-line intro__wave-line--gold" d={wave(Y)} pathLength="1" data-wave-line />
+    </g>
+  </svg>
+
   <div class="wrap intro__grid">
-    <div class="intro__text" data-intro-text>
+    <div class="intro__text">
       <p class="label intro__label" data-intro-fade>{intro.label}</p>
       <h2 id="intro-title" class="intro__title split">
-        <span class="line"><span>{intro.heading.pre} <em>{intro.heading.em}</em>{intro.heading.end}</span></span>
+        <span class="line"><span>{intro.heading.pre}</span></span>
+        <span class="line"><span>{intro.heading.pre2} <em class="intro__em">{intro.heading.em}<svg class="intro__stroke" viewBox="0 0 300 24" preserveAspectRatio="none" aria-hidden="true"><path d="M4 16C60 8 120 6 170 9s96 6 126 2" /></svg></em>{intro.heading.end}</span></span>
       </h2>
+      <p class="intro__lead" data-intro-fade>{intro.lead}</p>
       <div class="intro__actions" data-intro-fade>
         <a class="intro__btn" href={intro.cta.href}>{intro.cta.label} <span aria-hidden="true">→</span></a>
         <a class="intro__link" href={intro.link.href}>{intro.link.label} <span aria-hidden="true">↗</span></a>
       </div>
+      <dl class="intro__facts" data-intro-fade>
+        {intro.facts.map((f) => (
+          <div class="intro__fact"><dt>{f.value}</dt><dd>{f.label}</dd></div>
+        ))}
+      </dl>
     </div>
 
-    <div class="intro__art" data-intro-art>
-      <div class="intro__stage">
-        <div class="intro__logo-motion" data-intro-logo-motion>
-          <div class="intro__logo" data-intro-logo>
-            <img src={intro.logo} alt={intro.art} width="1200" height="661" decoding="async" loading="lazy" />
-            <span class="intro__sheen" aria-hidden="true" style={`--logo-mask: url(${intro.logo})`}>
-              <span class="intro__sheen-beam" data-intro-sheen></span>
-            </span>
-          </div>
-        </div>
+    <div class="intro__art" data-intro-art style={`--wall:${intro.chips[start].color}`}>
+      <div class="intro__arch" data-intro-arch>
+        <svg class="intro__scene" viewBox="0 0 400 500" preserveAspectRatio="xMidYMax slice" role="img" aria-label="Illustration of the Siya Ram house being painted with a roller">
+          <defs>
+            <linearGradient id="sky" x1="0" y1="0" x2="0" y2="1">
+              <stop offset="0" stop-color="#F6EEDF" /><stop offset="1" stop-color="#EADBC2" />
+            </linearGradient>
+            <clipPath id="wall-clip"><rect x="70" y="236" width="260" height="196" /></clipPath>
+            <clipPath id="wipe-clip">
+              <path data-wipe d="M-420 220H62c14 26-12 44 0 70s-14 46 0 72-12 44 0 78H-420Z" />
+            </clipPath>
+          </defs>
+          <rect width="400" height="500" fill="url(#sky)" />
+          <circle cx="300" cy="118" r="44" fill="#F3D88F" opacity=".55" />
+          <!-- ground -->
+          <rect y="430" width="400" height="70" fill="#DCCFB8" />
+          <rect y="430" width="400" height="3" fill="#CDBEA3" />
+          <ellipse cx="200" cy="436" rx="170" ry="8" fill="#000" opacity=".08" />
+          <!-- chimney -->
+          <rect x="104" y="136" width="30" height="84" fill="#3653A8" />
+          <rect x="98" y="128" width="42" height="12" rx="2" fill="#253E86" />
+          <!-- wall: current colour + new colour revealed by the roller -->
+          <g clip-path="url(#wall-clip)">
+            <rect x="70" y="236" width="260" height="196" fill="var(--wall-from, var(--wall))" data-wall-base />
+            <rect x="70" y="236" width="260" height="196" fill="var(--wall)" clip-path="url(#wipe-clip)" data-wall-new />
+            <rect x="70" y="236" width="260" height="196" fill="url(#sky)" opacity=".0" />
+            <rect x="70" y="236" width="260" height="14" fill="#000" opacity=".12" />
+          </g>
+          <!-- roof -->
+          <path d="M46 246 200 118 354 246Z" fill="#1F3A8A" />
+          <path d="M46 246 200 118 210 126 62 250Z" fill="#2E4FA8" />
+          <rect x="40" y="244" width="320" height="10" rx="2" fill="#172C6B" />
+          <!-- window (logo's four gold panes) -->
+          <rect x="112" y="282" width="96" height="96" rx="3" fill="#FFFDF8" />
+          <g fill="#E0A526">
+            <rect x="120" y="290" width="36" height="36" rx="1.5" /><rect x="164" y="290" width="36" height="36" rx="1.5" />
+            <rect x="120" y="334" width="36" height="36" rx="1.5" /><rect x="164" y="334" width="36" height="36" rx="1.5" />
+          </g>
+          <path d="M122 292h20l-20 20Z M166 292h20l-20 20Z" fill="#fff" opacity=".35" />
+          <rect x="106" y="378" width="108" height="8" rx="2" fill="#FFFDF8" />
+          <!-- door -->
+          <path d="M244 432V332a26 26 0 0 1 52 0v100Z" fill="#26231F" />
+          <path d="M252 432V334a18 18 0 0 1 36 0v98" fill="none" stroke="#3A3630" stroke-width="2" />
+          <circle cx="282" cy="388" r="3.2" fill="#E0A526" />
+          <rect x="236" y="428" width="68" height="6" rx="2" fill="#B9AC95" />
+          <!-- shrubs -->
+          <circle cx="84" cy="424" r="22" fill="#6F7E60" /><circle cx="104" cy="430" r="15" fill="#8C9A7B" />
+          <circle cx="330" cy="426" r="19" fill="#8C9A7B" /><circle cx="314" cy="432" r="12" fill="#6F7E60" />
+          <!-- roller (from the logo) -->
+          <g data-roller>
+            <g transform="translate(318 214) rotate(-32)">
+              <path d="M28 -6 C46 -6 52 4 52 14 V30" fill="none" stroke="#9AA3B0" stroke-width="5" stroke-linecap="round" />
+              <rect x="44" y="28" width="16" height="62" rx="8" fill="#1F3A8A" />
+              <rect x="-40" y="-20" width="78" height="30" rx="10" fill="var(--wall)" stroke="#1B1B1B" stroke-opacity=".18" stroke-width="2" />
+              <rect x="-34" y="-14" width="66" height="5" rx="2.5" fill="#fff" opacity=".35" />
+            </g>
+          </g>
+          <!-- splatter -->
+          <g fill="var(--wall)" data-splat>
+            <circle cx="366" cy="200" r="4" /><circle cx="352" cy="176" r="2.6" /><circle cx="374" cy="232" r="2" /><circle cx="342" cy="160" r="1.8" />
+          </g>
+        </svg>
       </div>
-      <span class="intro__shadow" data-intro-shadow aria-hidden="true"></span>
-      <span class="intro__bar" data-intro-bar aria-hidden="true"></span>
+
+      <div class="intro__badge" aria-hidden="true" data-intro-badge>
+        <svg viewBox="0 0 120 120">
+          <defs><path id="badge-circle" d="M60 60m-46 0a46 46 0 1 1 92 0a46 46 0 1 1-92 0" /></defs>
+          <g class="intro__badge-ring">
+            <text><textPath href="#badge-circle" textLength="289">{intro.badge}{intro.badge}</textPath></text>
+          </g>
+        </svg>
+        <span class="intro__badge-year"><small>Since</small>{intro.badgeYear}</span>
+      </div>
+
+      <div class="intro__fan" data-intro-fan role="group" aria-label="Paint shades">
+        {intro.chips.map((c, i) => (
+          <button type="button" class="intro__chip" style={`--c:${c.color}`} data-chip data-i={i} aria-pressed={i === start ? 'true' : 'false'} aria-label={`Paint the wall ${c.name}`}>
+            <span class="intro__chip-swatch"></span>
+            <span class="intro__chip-name">{c.name}</span>
+          </button>
+        ))}
+        <span class="intro__rivet" aria-hidden="true"></span>
+      </div>
+      <p class="intro__hint" data-intro-hint><span aria-hidden="true">←</span> {intro.hint} <span aria-hidden="true">→</span></p>
     </div>
   </div>
 </section>
 
 <style>
-  .intro { position: relative; z-index: 3; padding-block: var(--section-y); overflow: hidden; }
-  .intro__grid { display: grid; grid-template-columns: minmax(0, 5fr) minmax(0, 6fr); gap: clamp(32px, 6vw, 112px); align-items: center; }
+  .intro {
+    position: relative; z-index: 3;
+    padding-block: clamp(64px, 9vw, 140px) var(--section-y);
+    background:
+      radial-gradient(80% 60% at 100% 100%, #EBE3D3 0%, transparent 70%),
+      radial-gradient(60% 50% at 0% 40%, #F8F5EE 0%, transparent 70%),
+      var(--paper);
+  }
+  /* ---- flowing paint edge ---- */
+  .intro__edge {
+    position: absolute; left: 0; right: 0; bottom: calc(100% - 2px);
+    width: 100%; height: clamp(56px, 7vw, 100px); display: block; pointer-events: none; overflow: visible;
+    filter: drop-shadow(0 -12px 22px rgba(0, 0, 0, .22));
+  }
+  .intro__wave-fill { fill: var(--paper); }
+  .intro__wave-line { fill: none; stroke-linecap: round; }
+  .intro__wave-line--gold { stroke: var(--gold); stroke-width: 5; }
+  .intro__wave-line--blue { stroke: var(--blue); stroke-width: 3; opacity: .85; }
+
+  .intro__grid {
+    position: relative; display: grid;
+    grid-template-columns: minmax(0, 6fr) minmax(0, 5fr);
+    gap: clamp(40px, 6vw, 120px); align-items: center;
+  }
+
+  /* ---- text ---- */
   .intro__label { display: inline-flex; align-items: center; gap: 10px; margin: 0 0 clamp(18px, 2vw, 28px); }
   .intro__label::before { content: ''; width: 6px; height: 6px; border-radius: 50%; background: var(--gold); }
-  .intro__title { font-family: var(--serif); font-weight: 500; font-size: clamp(40px, 5.2vw, 84px); line-height: 1; letter-spacing: -0.02em; color: var(--ink); margin: 0; }
-  .intro__title .line { display: block; }
-  .intro__title .line > span { display: inline; }
-  .intro__title em { font-style: italic; color: var(--blue); }
+  .intro__title {
+    font-family: var(--serif); font-weight: 400; color: var(--ink);
+    font-size: clamp(44px, 5.6vw, 92px); line-height: .98; letter-spacing: -0.03em; margin: 0;
+  }
+  .intro__em { position: relative; font-style: italic; color: var(--blue); white-space: nowrap; }
+  .intro__stroke { position: absolute; left: -2%; bottom: -0.12em; width: 104%; height: .26em; overflow: visible; pointer-events: none; }
+  .intro__stroke path { fill: none; stroke: var(--gold); stroke-width: 7; stroke-linecap: round; vector-effect: non-scaling-stroke; }
+  .intro__lead { margin-top: clamp(22px, 2.4vw, 32px); max-width: 44ch; font-size: var(--fs-lead); line-height: 1.55; color: var(--muted); }
   .intro__actions { display: flex; flex-wrap: wrap; align-items: center; gap: 14px 28px; margin-top: clamp(28px, 3vw, 40px); }
-  .intro__btn { display: inline-flex; align-items: center; gap: 10px; padding: 16px 24px; background: var(--ink); color: var(--paper); font-weight: 600; font-size: 15px; letter-spacing: .01em; border-radius: var(--radius); text-decoration: none; transition: background-color .3s; }
+  .intro__btn {
+    display: inline-flex; align-items: center; gap: 10px; padding: 17px 26px;
+    background: var(--ink); color: var(--paper); font-weight: 600; font-size: 15px; letter-spacing: .01em;
+    border-radius: var(--radius); text-decoration: none; transition: background-color .3s;
+  }
   .intro__btn span { transition: transform .3s; }
   .intro__btn:hover { background: var(--blue); }
   .intro__btn:hover span { transform: translateX(4px); }
   .intro__btn:focus-visible, .intro__link:focus-visible { outline: 2px solid var(--blue); outline-offset: 3px; }
   .intro__link { color: var(--ink); font-weight: 600; font-size: 15px; text-decoration: underline; text-decoration-thickness: 1px; text-underline-offset: 6px; }
   .intro__link:hover { color: var(--blue); }
-  .intro__art { position: relative; display: grid; justify-items: center; gap: clamp(14px, 1.8vw, 24px); }
-  .intro__stage { width: min(100%, 540px); perspective: 1000px; }
-  .intro__logo-motion { will-change: transform; transform-style: preserve-3d; }
-  .intro__logo { position: relative; width: 100%; will-change: clip-path, transform, opacity; }
-  .intro__logo img {
-    display: block; width: 100%; height: auto;
-    filter: drop-shadow(0 16px 28px rgba(27, 27, 27, 0.14));
+  .intro__facts { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); margin: clamp(40px, 5vw, 64px) 0 0; max-width: 560px; border-top: 1px solid rgba(27, 27, 27, .14); }
+  .intro__fact { padding: 18px 16px 0 0; }
+  .intro__fact + .intro__fact { padding-left: 18px; border-left: 1px solid rgba(27, 27, 27, .14); }
+  .intro__fact dt { font-family: var(--serif); font-size: clamp(30px, 3vw, 44px); line-height: 1; color: var(--ink); letter-spacing: -0.02em; }
+  .intro__fact dd { margin: 8px 0 0; font-size: 13px; line-height: 1.35; color: var(--muted); }
+
+  /* ---- art ---- */
+  .intro__art { position: relative; width: 100%; max-width: 460px; justify-self: end; padding: 0 0 12% 14%; }
+  .intro__arch {
+    position: relative; aspect-ratio: 4 / 5; overflow: hidden;
+    border-radius: 999px 999px 12px 12px; background: #EFE4D0;
+    box-shadow: 0 30px 60px -30px rgba(27, 27, 27, .45);
   }
-  .intro__sheen {
-    position: absolute; inset: 0; pointer-events: none; overflow: hidden;
-    -webkit-mask: var(--logo-mask) center / contain no-repeat;
-    mask: var(--logo-mask) center / contain no-repeat;
+  .intro__arch::after { content: ''; position: absolute; inset: 12px; border-radius: inherit; border: 1px solid rgba(255, 255, 255, .75); pointer-events: none; }
+  .intro__scene { display: block; width: 100%; height: 100%; }
+
+  .intro__badge {
+    position: absolute; top: 4%; right: -6%; width: clamp(104px, 9vw, 132px); aspect-ratio: 1;
+    border-radius: 50%; background: var(--ink); color: var(--paper);
+    display: grid; place-items: center; box-shadow: 0 14px 30px -12px rgba(0, 0, 0, .5);
   }
-  .intro__sheen-beam {
-    display: block; position: absolute; inset: -30% -50%;
-    background: linear-gradient(
-      110deg,
-      transparent 38%,
-      rgba(255, 248, 224, 0.5) 48%,
-      rgba(224, 165, 38, 0.42) 52%,
-      transparent 62%
-    );
-    will-change: transform;
+  .intro__badge svg { position: absolute; inset: 0; width: 100%; height: 100%; }
+  .intro__badge-ring { transform-origin: 60px 60px; animation: badgeSpin 22s linear infinite; }
+  .intro__badge text { fill: currentColor; font: 600 8.6px var(--sans); letter-spacing: .16em; text-transform: uppercase; }
+  .intro__badge-year { position: relative; display: grid; justify-items: center; font-family: var(--serif); font-size: clamp(22px, 2vw, 28px); line-height: 1; color: #ffcf4a; }
+  .intro__badge-year small { font: 600 9px/1 var(--sans); letter-spacing: .2em; text-transform: uppercase; color: rgba(244, 240, 232, .7); margin-bottom: 4px; }
+  @keyframes badgeSpin { to { transform: rotate(360deg); } }
+
+  .intro__fan {
+    position: absolute; left: 0; bottom: 4%; width: clamp(88px, 7.6vw, 108px); height: clamp(150px, 13vw, 184px);
+    touch-action: pan-y; user-select: none; -webkit-user-select: none;
   }
-  .intro__shadow {
-    display: block; width: min(68%, 320px); height: 14px;
-    border-radius: 50%;
-    background: radial-gradient(closest-side, rgba(27, 27, 27, 0.22), transparent);
-    filter: blur(4px);
-    will-change: transform, opacity;
+  .intro__chip {
+    position: absolute; inset: 0; display: flex; flex-direction: column; align-items: stretch; text-align: left;
+    padding: 6px 6px 22px; margin: 0; border: 0; background: #FFFDF8; border-radius: 6px; cursor: pointer;
+    transform-origin: 50% 94%; -webkit-tap-highlight-color: transparent;
+    box-shadow: 0 1px 0 rgba(0, 0, 0, .06), 0 12px 24px -12px rgba(27, 27, 27, .45);
   }
-  .intro__bar { display: block; width: min(60%, 240px); height: 3px; background: var(--gold); transform-origin: left center; will-change: transform; }
+  .intro__chip:focus-visible { outline: 2px solid var(--blue); outline-offset: 2px; }
+  .intro__chip-swatch { flex: 1; border-radius: 3px; background: var(--c); box-shadow: inset 0 0 0 1px rgba(0, 0, 0, .06); }
+  .intro__chip-name { margin-top: 7px; font: 700 10.5px/1.15 var(--sans); color: var(--ink); }
+  .intro__rivet {
+    position: absolute; left: 50%; bottom: 6%; width: 9px; height: 9px; margin: 0 0 -4px -4.5px; z-index: 20; pointer-events: none;
+    border-radius: 50%; background: radial-gradient(circle at 35% 35%, #fff, #9a958c); box-shadow: 0 1px 2px rgba(0,0,0,.35);
+  }
+  .intro__hint {
+    position: absolute; left: 14%; right: 0; bottom: -2%; text-align: center;
+    font-size: 12px; letter-spacing: .08em; color: var(--muted); transition: opacity .5s;
+  }
+  .intro__hint.is-gone { opacity: 0; }
+
   @media (max-width: 860px) {
     .intro__grid { grid-template-columns: 1fr; }
-    .intro__art { max-width: 520px; width: 100%; margin-inline: auto; }
-    .intro__stage { width: min(94%, 420px); }
+    .intro__art { justify-self: center; max-width: 380px; margin-top: 8px; padding: 0 4% 14% 22%; }
+    .intro__fan { left: 9%; }
+    .intro__hint { left: 22%; }
+    .intro__badge { right: 0; }
   }
-  @media (prefers-reduced-motion: reduce) {
-    .intro__sheen { display: none; }
+  @media (max-width: 480px) {
+    .intro__title { font-size: clamp(42px, 12vw, 54px); }
+    .intro__fact { padding-right: 10px; }
+    .intro__fact + .intro__fact { padding-left: 12px; }
+    .intro__fact dd { font-size: 12px; }
   }
+  @media (prefers-reduced-motion: reduce) { .intro__badge-ring { animation: none; } }
 </style>
 
 <script>
@@ -99,53 +255,114 @@ import { intro } from '../content/site';
   const root = document.querySelector<HTMLElement>('#intro');
   const reduce = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
 
-  if (root && !reduce) {
-    const q = (s: string) => root.querySelectorAll(s);
-    const lines = q('.intro__title .line > span');
-    const fades = q('[data-intro-fade]');
-    const art = root.querySelector('[data-intro-art]');
-    const logoReveal = root.querySelector('[data-intro-logo]');
-    const logoMotion = root.querySelector('[data-intro-logo-motion]');
-    const sheen = root.querySelector('[data-intro-sheen]');
-    const shadow = root.querySelector('[data-intro-shadow]');
-    const bar = root.querySelector('[data-intro-bar]');
-    const text = root.querySelector('[data-intro-text]');
+  if (root) {
+    const art = root.querySelector<HTMLElement>('[data-intro-art]')!;
+    const chips = Array.from(root.querySelectorAll<HTMLButtonElement>('[data-chip]'));
+    const fan = root.querySelector<HTMLElement>('[data-intro-fan]')!;
+    const hint = root.querySelector<HTMLElement>('[data-intro-hint]');
+    const wipe = root.querySelector<SVGPathElement>('[data-wipe]');
+    const roller = root.querySelector<SVGGElement>('[data-roller]');
+    const splat = root.querySelector<SVGGElement>('[data-splat]');
+    const n = chips.length;
+    const ANGLES = [9, -3, -15, -27, -39]; // front -> back
+    let sel = 0;
+    let busy = false;
 
-    // (a) Text entry — scrubbed as the section enters.
-    gsap.timeline({ defaults: { ease: 'none' }, scrollTrigger: { trigger: root, start: 'top 85%', end: 'top 25%', scrub: 0.8 } })
-      .fromTo(lines, { yPercent: 110 }, { yPercent: 0, duration: 0.6 }, 0.1)
-      .fromTo(fades, { autoAlpha: 0, y: 24 }, { autoAlpha: 1, y: 0, duration: 0.5, stagger: 0.15 }, 0.2);
+    // ---- fan layout: selected chip at the front, the rest fanned behind ----
+    function layout(animate: boolean) {
+      chips.forEach((c, i) => {
+        const p = (i - sel + n) % n;
+        c.style.zIndex = String(n - p);
+        c.setAttribute('aria-pressed', p === 0 ? 'true' : 'false');
+        const vars = { rotate: ANGLES[p] ?? ANGLES[ANGLES.length - 1], y: 0 };
+        if (animate && !reduce) gsap.to(c, { ...vars, duration: 0.7, ease: 'expo.out' });
+        else gsap.set(c, vars);
+      });
+    }
 
-    // (b) Logo unveil — triggered by the logo container itself so mobile & desktop both scrub in view.
-    gsap.timeline({ defaults: { ease: 'none' }, scrollTrigger: { trigger: art, start: 'top 92%', end: 'center 54%', scrub: 0.65 } })
-      .fromTo(
-        logoReveal,
-        { clipPath: 'inset(0% 100% 0% 0%)', scale: 0.88, autoAlpha: 0.15 },
-        { clipPath: 'inset(0% 0% 0% 0%)', scale: 1, autoAlpha: 1, duration: 1 },
-        0
-      )
-      .fromTo(bar, { scaleX: 0 }, { scaleX: 1, duration: 0.55 }, 0.45);
+    // ---- repaint the wall: new colour rolls in behind a soft brush edge ----
+    function select(i: number) {
+      i = (i + n) % n;
+      if (i === sel || busy) return;
+      const from = getComputedStyle(art).getPropertyValue('--wall').trim();
+      const to = chips[i].style.getPropertyValue('--c').trim();
+      sel = i;
+      if (!reduce) gsap.fromTo(chips[i], { y: -26 }, { y: 0, duration: 0.6, ease: 'back.out(2)' });
+      layout(true);
+      art.style.setProperty('--wall-from', from);
+      art.style.setProperty('--wall', to);
+      if (reduce || !wipe) { art.style.removeProperty('--wall-from'); return; }
+      busy = true;
+      gsap.timeline({ onComplete: () => { art.style.removeProperty('--wall-from'); gsap.set(wipe, { x: 0 }); busy = false; } })
+        .fromTo(wipe, { x: 0 }, { x: 300, duration: 1.05, ease: 'power2.inOut' }, 0)
+        .fromTo(roller, { x: -230, y: 60, rotate: 0 }, { x: 0, y: 0, duration: 1.05, ease: 'power2.inOut', svgOrigin: '330 230' }, 0)
+        .fromTo(splat, { scale: 0.2, autoAlpha: 0, svgOrigin: '360 200' }, { scale: 1, autoAlpha: 1, duration: 0.5, ease: 'back.out(3)' }, 0.85);
+    }
 
-    // (c) Continuous 3D scroll choreography while the logo passes through the viewport.
-    const pass = { trigger: art, start: 'top bottom', end: 'bottom top', scrub: 0.55 };
-    gsap.timeline({ defaults: { ease: 'none' }, scrollTrigger: pass })
-      .fromTo(
-        logoMotion,
-        { y: 52, rotateX: 10, rotateY: -12, rotateZ: -4, scale: 0.92 },
-        { y: 0, rotateX: 0, rotateY: 0, rotateZ: 0, scale: 1.04, duration: 0.5 }
-      )
-      .to(
-        logoMotion,
-        { y: -52, rotateX: -8, rotateY: 12, rotateZ: 3.5, scale: 0.94, duration: 0.5 }
-      );
+    layout(false);
 
-    gsap.fromTo(sheen, { xPercent: -115 }, { xPercent: 115, ease: 'none', scrollTrigger: { ...pass } });
-    gsap.timeline({ defaults: { ease: 'none' }, scrollTrigger: { ...pass } })
-      .fromTo(shadow, { x: -16, scaleX: 0.82, autoAlpha: 0.18 }, { x: 0, scaleX: 1.06, autoAlpha: 0.34, duration: 0.5 })
-      .to(shadow, { x: 16, scaleX: 0.84, autoAlpha: 0.16, duration: 0.5 });
+    // tap / click
+    let userTouched = false;
+    const stopAuto = () => { if (!userTouched && hint) gsap.to(hint, { autoAlpha: 0, duration: 0.5 }); userTouched = true; };
+    chips.forEach((c, i) => c.addEventListener('click', () => {
+      if (dragged) return;
+      stopAuto();
+      select(i === sel ? sel + 1 : i);
+    }));
+    // swipe / drag across the fan
+    let x0 = 0, dragged = false, down = false;
+    fan.addEventListener('pointerdown', (e) => { down = true; dragged = false; x0 = e.clientX; });
+    window.addEventListener('pointerup', (e) => {
+      if (!down) return; down = false;
+      const dx = e.clientX - x0;
+      if (Math.abs(dx) > 28) { dragged = true; stopAuto(); select(sel + (dx < 0 ? 1 : -1)); setTimeout(() => (dragged = false), 50); }
+    });
+    // keyboard
+    fan.addEventListener('keydown', (e) => {
+      if (e.key === 'ArrowRight' || e.key === 'ArrowLeft') { e.preventDefault(); stopAuto(); select(sel + (e.key === 'ArrowRight' ? 1 : -1)); chips[sel].focus(); }
+    });
 
-    gsap.fromTo(bar, { x: 18 }, { x: -18, ease: 'none', scrollTrigger: { ...pass } });
-    gsap.fromTo(text, { yPercent: 5 }, { yPercent: -5, ease: 'none', scrollTrigger: { trigger: root, start: 'top bottom', end: 'bottom top', scrub: 1 } });
+    // gentle auto-demo while visible, until the visitor interacts
+    let timer: number | undefined;
+    if (!reduce) {
+      new IntersectionObserver(([en]) => {
+        clearInterval(timer);
+        if (en.isIntersecting && !userTouched) timer = window.setInterval(() => (userTouched ? clearInterval(timer) : select(sel + 1)), 3400);
+      }, { threshold: 0.5 }).observe(art);
+    }
+
+    if (!reduce) {
+      // ---- the connecting paint edge: wave flows, gold + blue lines draw across ----
+      const waveG = root.querySelector('[data-wave]');
+      const lines = root.querySelectorAll('[data-wave-line]');
+      gsap.set(lines, { strokeDasharray: 1, strokeDashoffset: 1 });
+      gsap.timeline({ defaults: { ease: 'none' }, scrollTrigger: { trigger: root, start: 'top bottom', end: 'top 15%', scrub: 0.6 } })
+        .fromTo(waveG, { x: 0 }, { x: -720, duration: 1 }, 0)
+        .to(lines[1], { strokeDashoffset: 0, duration: 0.7 }, 0.05)
+        .to(lines[0], { strokeDashoffset: 0, duration: 0.7 }, 0.2);
+
+      // ---- text entrance ----
+      const tl = root.querySelectorAll('.intro__title .line > span');
+      const fades = root.querySelectorAll('[data-intro-fade]');
+      const stroke = root.querySelector<SVGPathElement>('.intro__stroke path');
+      const len = stroke ? stroke.getTotalLength() : 0;
+      if (stroke) gsap.set(stroke, { strokeDasharray: len, strokeDashoffset: len });
+      const tText = gsap.timeline({ paused: true, defaults: { ease: 'expo.out' } })
+        .fromTo(tl, { yPercent: 110 }, { yPercent: 0, duration: 1.1, stagger: 0.12 })
+        .to(stroke, { strokeDashoffset: 0, duration: 0.9, ease: 'power2.inOut' }, 0.55)
+        .fromTo(fades, { autoAlpha: 0, y: 22 }, { autoAlpha: 1, y: 0, duration: 0.9, stagger: 0.1 }, 0.3);
+      ScrollTrigger.create({ trigger: root, start: 'top 70%', once: true, onEnter: () => tText.play() });
+
+      // ---- art entrance ----
+      const arch = root.querySelector('[data-intro-arch]');
+      const badge = root.querySelector('[data-intro-badge]');
+      const tArt = gsap.timeline({ paused: true, defaults: { ease: 'expo.out' } })
+        .fromTo(arch, { clipPath: 'inset(100% 0% 0% 0% round 999px 999px 12px 12px)' }, { clipPath: 'inset(0% 0% 0% 0% round 999px 999px 12px 12px)', duration: 1.4, ease: 'power4.inOut' })
+        .from(chips, { rotate: 0, y: 30, autoAlpha: 0, duration: 1.2, stagger: 0.06 }, 0.6)
+        .fromTo(badge, { scale: 0.4, autoAlpha: 0, rotate: -40 }, { scale: 1, autoAlpha: 1, rotate: 0, duration: 1.1, ease: 'back.out(1.6)' }, 0.9)
+        .fromTo(hint, { autoAlpha: 0 }, { autoAlpha: 1, duration: 0.8 }, 1.3);
+      ScrollTrigger.create({ trigger: art, start: 'top 80%', once: true, onEnter: () => tArt.play() });
+    }
   }
 
   window.addEventListener('load', () => ScrollTrigger.refresh());

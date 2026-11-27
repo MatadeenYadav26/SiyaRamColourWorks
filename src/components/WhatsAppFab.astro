@@ -56,6 +56,9 @@ import { site, fab } from '../content/site';
     100% { transform: scale(1.7); opacity: 0; }
   }
   @media (hover: none) { .fab-label { display: none; } }
+  /* Mobile hero already has its own WhatsApp button: keep the bubble out of the way until scrolling past it */
+  .fab { transition: opacity .35s var(--ease-out, ease-out), visibility .35s; }
+  :global(html.hero-in-view) .fab, :global(html.footer-in-view) .fab, :global(html.profile-open) .fab { opacity: 0; visibility: hidden; pointer-events: none; }
   @media (prefers-reduced-motion: reduce) { .fab-ring { animation: none; opacity: 0; } }
 </style>
 

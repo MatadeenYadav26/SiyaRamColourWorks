@@ -6,3 +6,7 @@ dist/
 !.env.example
 .DS_Store
 Thumbs.db
+.vercel
+
+_preview_sheet.jpg
+_backup_before_redesign/

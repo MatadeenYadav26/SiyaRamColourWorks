@@ -1,39 +1,52 @@
 ---
 import { services } from '../content/site';
+const total = String(services.items.length).padStart(2, '0');
 ---
-<section id="services" class="services tint-concrete" aria-labelledby="services-title">
+<section id="services" class="services tint-concrete seam" style="--seam-from:#E7DFCF" aria-labelledby="services-title">
   <div class="wrap services__grid">
     <header class="services__head">
-      <p class="label" data-svc-fade>{services.label}</p>
+      <p class="label" data-svc-fade data-fall>{services.label}</p>
       <h2 id="services-title" class="services__title split">
         {services.heading.map((l) => (
-          <span class="line"><span>{l}</span></span>
+          <span class="line"><span data-fall>{l}</span></span>
         ))}
       </h2>
     </header>
 
-    <ul class="services__list" role="list">
+    <ul class="services__list" role="list" data-svc-track>
       {services.items.map((s, i) => (
         <li class="svc" data-svc-row data-src={s.src}>
           <span class="svc__rule" aria-hidden="true"></span>
           <div class="svc__inner">
-            <span class="svc__num">{String(i + 1).padStart(2, '0')}</span>
-            <span class="svc__name">{s.name}</span>
-            <span class="svc__note">{s.note}</span>
-            <img class="svc__thumb" src={s.src} alt="" width="160" height="120" loading="lazy" decoding="async" />
+            <span class="svc__num" data-fall>{String(i + 1).padStart(2, '0')}</span>
+            <div class="svc__copy">
+              <span class="svc__name" data-fall>{s.name}</span>
+              <span class="svc__quality">{s.quality}</span>
+              <a class="svc__cta" href="#enquiry" data-svc-type={s.type}>
+                {services.cta}<span aria-hidden="true">→</span>
+              </a>
+            </div>
+            <span class="svc__note" data-fall>{s.note}</span>
+            <img class="svc__thumb" src={s.src} alt={`${s.name} painting work by Siya Ram Colour Works`} width="160" height="120" loading="lazy" decoding="async" />
           </div>
         </li>
       ))}
       <li class="svc svc--end" aria-hidden="true"><span class="svc__rule"></span></li>
     </ul>
+
+    <!-- phone: swipe position -->
+    <div class="svc-pager" aria-hidden="true">
+      <span class="svc-pager__count"><b data-svc-now>01</b> / {total}</span>
+      <span class="svc-pager__bar"><i data-svc-bar></i></span>
+      <span class="svc-pager__hint">{services.swipe}<span>→</span></span>
+    </div>
   </div>
 
-  <div class="svc-preview" aria-hidden="true">
-    <div class="svc-preview__frame">
-      {services.items.map((s, i) => (
-        <img src={s.src} alt="" loading="lazy" decoding="async" data-i={i} />
-      ))}
-    </div>
+  <!-- desktop finale: rising paint -->
+  <div class="svc-flood" aria-hidden="true" data-svc-flood>
+    <span class="svc-flood__crest svc-flood__crest--back"></span>
+    <span class="svc-flood__crest"></span>
+    <span class="svc-flood__body"></span>
   </div>
 </section>
 
@@ -63,68 +76,200 @@ import { services } from '../content/site';
     transform-origin: left center;
   }
   .svc__inner {
+    position: relative;
+    overflow: hidden;
+    border-radius: var(--image-radius);
     display: grid;
     grid-template-columns: 3.5rem minmax(0, 1fr) minmax(0, 15rem);
     align-items: baseline;
     gap: clamp(12px, 2vw, 32px);
     padding-block: clamp(22px, 3.2vw, 44px);
-    transition: transform 0.7s var(--ease-out), color 0.5s var(--ease-out);
+    transition: transform 0.7s var(--ease-out), color 0.5s var(--ease-out), padding 0.6s var(--ease-out);
   }
   .svc__num { font-size: var(--fs-label); letter-spacing: 0.08em; color: var(--muted); }
+  .svc__copy { min-width: 0; }
   .svc__name {
+    display: block;
     font-family: var(--serif);
     font-weight: 400;
     font-size: clamp(32px, 5.4vw, 84px);
     line-height: 1;
     letter-spacing: -0.02em;
+    transition: font-size 0.5s var(--ease-out);
   }
-  .svc__note { font-size: var(--fs-label); color: var(--muted); letter-spacing: 0.04em; text-align: right; }
-  .svc__thumb { display: none; }
-
-  @media (hover: hover) and (pointer: fine) {
-    .svc:hover .svc__inner { transform: translateX(clamp(12px, 2vw, 32px)); color: var(--blue); }
-    .svc:hover .svc__num { color: var(--gold); }
+  .svc__quality {
+    display: block; max-height: 0; overflow: hidden; margin-top: 0;
+    color: var(--muted); font-size: clamp(13px, 1vw, 15px); line-height: 1.55;
+    opacity: 0; transform: translateY(8px);
+    transition: max-height 0.5s var(--ease-out), margin 0.4s var(--ease-out), opacity 0.3s var(--ease-out), transform 0.4s var(--ease-out);
   }
-
-  /* floating cursor preview (desktop only, enabled by script) */
-  .svc-preview {
-    position: fixed; left: 0; top: 0; z-index: 40;
-    width: clamp(220px, 20vw, 320px); aspect-ratio: 4 / 5;
-    pointer-events: none; opacity: 0; visibility: hidden;
+  .svc__cta {
+    display: inline-flex; align-items: center; gap: 10px;
+    font: 600 12px/1 var(--sans); letter-spacing: .16em; text-transform: uppercase;
+    color: var(--ink); text-decoration: none;
+    padding: 12px 18px; border-radius: 999px; background: var(--gold);
   }
-  .svc-preview__frame {
-    position: absolute; inset: 0; overflow: hidden; border-radius: var(--radius);
-    transform: translate(-50%, -50%);
+  .svc__cta span { transition: transform .4s var(--ease-out); }
+  .svc__cta:hover span { transform: translateX(4px); }
+  .svc__cta:focus-visible { outline: 2px solid var(--blue); outline-offset: 3px; }
+  .svc__note {
+    font-size: var(--fs-label); color: var(--muted); letter-spacing: 0.04em; text-align: right;
+    transition: opacity 0.3s var(--ease-out);
   }
-  .svc-preview img {
-    position: absolute; inset: 0; width: 100%; height: 100%; object-fit: cover;
+  .svc__thumb {
+    position: absolute; z-index: 0; inset: 0;
+    display: block; width: 100%; height: 100%;
+    object-fit: cover; pointer-events: none; filter: saturate(0.82);
+    opacity: 0; clip-path: inset(0 100% 0 0); transform: scale(1.04);
+    transition: clip-path 0.65s var(--ease-out), opacity 0.4s var(--ease-out), transform 0.6s var(--ease-out);
+  }
+  .svc__inner::after {
+    content: ''; position: absolute; z-index: 1; inset: 0; pointer-events: none;
+    background: linear-gradient(90deg, rgba(220, 216, 209, 0.96), rgba(220, 216, 209, 0.82) 42%, rgba(220, 216, 209, 0.36));
     opacity: 0; transition: opacity 0.45s var(--ease-out);
   }
-  .svc-preview img.is-on { opacity: 1; }
+  .svc__num, .svc__copy, .svc__note { position: relative; z-index: 2; }
+  .svc-pager, .svc-flood { display: none; }
 
-  @media (max-width: 860px), (hover: none) {
-    .services__grid { grid-template-columns: 1fr; }
-    .services__head { position: static; }
-    .svc__inner { grid-template-columns: 2.2rem minmax(0, 1fr) 84px; align-items: center; row-gap: 4px; }
-    .svc__name { font-size: clamp(26px, 7vw, 44px); grid-column: 2; }
-    .svc__note { grid-column: 2; grid-row: 2; text-align: left; }
-    .svc__num { grid-row: 1 / span 2; align-self: start; padding-top: 0.5em; }
-    .svc__thumb {
-      display: block; grid-column: 3; grid-row: 1 / span 2;
-      width: 84px; height: 64px; object-fit: cover; border-radius: var(--radius);
+  /* ---------------- desktop ---------------- */
+  @media (min-width: 861px) and (hover: hover) and (pointer: fine) {
+    /* the quote button only appears inside the opened row */
+    .svc__cta { position: absolute; left: 0; top: 100%; margin-top: 10px; opacity: 0; transform: translateY(8px); pointer-events: none;
+      transition: opacity .3s var(--ease-out), transform .4s var(--ease-out); }
+    .svc:hover .svc__cta { opacity: 1; transform: none; pointer-events: auto; transition-delay: .12s; }
+    .svc:hover .svc__inner {
+      transform: translateX(clamp(12px, 2vw, 32px)); color: var(--blue);
+      padding-bottom: clamp(110px, 14vw, 170px);
     }
-    .svc-preview { display: none; }
+    .svc:hover .svc__num { color: var(--gold); }
+    .svc:hover .svc__name { font-size: clamp(38px, 6.5vw, 96px); }
+    .svc:hover .svc__quality { max-height: 8em; margin-top: 12px; opacity: 1; transform: none; }
+    .svc:hover .svc__note { opacity: 0; }
+    .svc:hover .svc__thumb { opacity: 0.48; clip-path: inset(0); transform: scale(1); }
+    .svc:hover .svc__inner::after { opacity: 1; }
+
+    /* split letters */
+    .services :global(.fw) { display: inline-block; white-space: nowrap; }
+    .services :global(.fc) { display: inline-block; will-change: transform; }
+    /* while the finale runs nothing may clip the falling letters */
+    .services.is-falling .svc__inner, .services.is-falling .split .line { overflow: visible; }
+    .services.is-falling { pointer-events: none; }
+    .services.is-falling .svc__thumb, .services.is-falling .svc__inner::after, .services.is-falling .svc__cta { display: none; }
+
+    .svc-flood {
+      display: block; position: absolute; z-index: 6; left: 0; right: 0; bottom: 0; height: 100vh;
+      pointer-events: none; visibility: hidden;
+    }
+    .svc-flood__body {
+      position: absolute; inset: 0;
+      background:
+        radial-gradient(70% 40% at 30% 18%, rgba(255, 255, 255, .16), rgba(255, 255, 255, 0) 70%),
+        radial-gradient(50% 30% at 78% 60%, rgba(255, 255, 255, .08), rgba(255, 255, 255, 0) 70%),
+        linear-gradient(180deg, #2A4DB0 0%, var(--blue) 45%, #172C6B 100%);
+    }
+    .svc-flood__crest {
+      position: absolute; left: 0; right: 0; bottom: calc(100% - 2px); height: 70px;
+      background: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 600 70' preserveAspectRatio='none'%3E%3Cpath d='M0 40 C 75 0 150 0 225 30 S 375 70 450 34 S 560 4 600 40 V70 H0Z' fill='%232A4DB0'/%3E%3C/svg%3E") repeat-x;
+      background-size: 600px 100%;
+      animation: svc-wave 3.2s linear infinite paused;
+    }
+    .svc-flood__crest--back {
+      bottom: calc(100% + 14px); height: 80px; opacity: .95;
+      background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 520 80' preserveAspectRatio='none'%3E%3Cpath d='M0 46 C 90 6 170 10 260 44 S 430 78 520 46 V80 H0Z' fill='%23E3A92B'/%3E%3C/svg%3E");
+      background-size: 520px 100%;
+      animation-duration: 4.6s; animation-direction: reverse;
+    }
+    .services.is-flooding .svc-flood__crest { animation-play-state: running; }
+    @keyframes svc-wave { to { background-position-x: 600px; } }
+    .svc-flood__crest--back { animation-name: svc-wave2; }
+    @keyframes svc-wave2 { to { background-position-x: 520px; } }
   }
+
+  /* ---------------- phone & tablet: swipeable cards ---------------- */
+  @media (max-width: 860px), (hover: none) {
+    .services__grid { grid-template-columns: 1fr; gap: 28px; }
+    .services__head { position: static; }
+    .svc__rule, .svc--end { display: none; }
+
+    .services__list {
+      display: flex; gap: 14px;
+      overflow-x: auto; overscroll-behavior-x: contain;
+      scroll-snap-type: x mandatory; scroll-padding-inline: var(--gutter);
+      margin-inline: calc(-1 * var(--gutter)); padding: 4px var(--gutter) 18px;
+      scrollbar-width: none; -webkit-overflow-scrolling: touch;
+    }
+    .services__list::-webkit-scrollbar { display: none; }
+    .svc { flex: 0 0 min(80vw, 340px); scroll-snap-align: start; }
+    .svc__inner {
+      display: flex; flex-direction: column; height: 100%;
+      padding: 0; gap: 0; border-radius: 14px;
+      background: #FBF9F4; box-shadow: 0 1px 0 rgba(27, 27, 27, .05), 0 18px 34px -24px rgba(40, 30, 15, .45);
+    }
+    .svc__inner::after { display: none; }
+    .svc__thumb {
+      position: relative; order: -1; width: 100%; height: auto; aspect-ratio: 4 / 3;
+      opacity: 1; clip-path: none; transform: none; filter: none; border-radius: 0;
+    }
+    .svc__num {
+      position: absolute; top: 12px; left: 12px; z-index: 3;
+      padding: 6px 10px; border-radius: 999px; background: rgba(251, 249, 244, .92);
+      color: var(--ink); font-weight: 600;
+    }
+    .svc__copy { padding: 18px 18px 0; flex: 1; display: flex; flex-direction: column; }
+    .svc__name { font-size: clamp(26px, 7.4vw, 34px); line-height: 1.05; }
+    .svc__quality { max-height: none; opacity: 1; transform: none; margin: 10px 0 18px; font-size: 14px; }
+    .svc__note { order: 2; padding: 0 18px; text-align: left; font-size: 12px; margin-top: -8px; margin-bottom: 14px; }
+    .svc__copy { order: 1; }
+    .svc__cta { align-self: flex-start; margin-top: auto; margin-bottom: 18px; }
+    .svc__note { display: none; }
+
+    .svc-pager { display: flex; align-items: center; gap: 14px; margin-top: 2px; font: 600 12px/1 var(--sans); letter-spacing: .14em; color: var(--muted); }
+    .svc-pager__count b { color: var(--ink); }
+    .svc-pager__bar { flex: 1; height: 2px; background: rgba(27, 27, 27, .12); border-radius: 2px; overflow: hidden; }
+    .svc-pager__bar i { display: block; height: 100%; width: 100%; background: var(--blue); transform-origin: left center; transform: scaleX(.25); transition: transform .3s var(--ease-out); }
+    .svc-pager__hint { text-transform: uppercase; display: inline-flex; gap: 6px; }
+    .svc-pager__hint span { display: inline-block; animation: svc-nudge 1.6s var(--ease-out) infinite; }
+    @keyframes svc-nudge { 0%, 100% { transform: none; } 50% { transform: translateX(5px); } }
+  }
+  @media (prefers-reduced-motion: reduce) { .svc-pager__hint span { animation: none; } }
 </style>
 
 <script>
   import { gsap } from 'gsap';
   import { ScrollTrigger } from 'gsap/ScrollTrigger';
+  import { finaleEnabled } from '../scripts/finale';
   gsap.registerPlugin(ScrollTrigger);
 
   const root = document.getElementById('services');
   const reduce = matchMedia('(prefers-reduced-motion: reduce)').matches;
-  const fine = matchMedia('(hover: hover) and (pointer: fine)').matches && innerWidth > 860;
+
+  // "Get a quote": pre-select the property type in the enquiry form
+  root?.querySelectorAll<HTMLAnchorElement>('[data-svc-type]').forEach((a) => a.addEventListener('click', (e) => {
+    const t = a.dataset.svcType;
+    const radio = document.querySelector<HTMLInputElement>(`#enquiry input[name="type"][value="${t}"]`);
+    if (radio) { radio.checked = true; radio.dispatchEvent(new Event('change', { bubbles: true })); }
+    const target = document.getElementById('enquiry');
+    const lenis = (window as any).__lenis;
+    if (target && lenis) { e.preventDefault(); lenis.scrollTo(target, { duration: 1.4 }); }
+  }));
+
+  // phone: swipe counter + progress bar
+  const track = root?.querySelector<HTMLElement>('[data-svc-track]');
+  const now = root?.querySelector<HTMLElement>('[data-svc-now]');
+  const bar = root?.querySelector<HTMLElement>('[data-svc-bar]');
+  if (track && now && bar) {
+    const cards = track.querySelectorAll<HTMLElement>('.svc[data-svc-row]');
+    let raf = 0;
+    const update = () => {
+      raf = 0;
+      const max = track.scrollWidth - track.clientWidth;
+      const p = max > 0 ? track.scrollLeft / max : 0;
+      const idx = Math.round(p * (cards.length - 1));
+      now.textContent = String(idx + 1).padStart(2, '0');
+      bar.style.transform = `scaleX(${(idx + 1) / cards.length})`;
+    };
+    track.addEventListener('scroll', () => { if (!raf) raf = requestAnimationFrame(update); }, { passive: true });
+  }
 
   if (root && !reduce) {
     const lines = root.querySelectorAll('.split .line > span');
@@ -144,34 +289,200 @@ import { services } from '../content/site';
       .to(inners, { autoAlpha: 1, y: 0, stagger: 0.1, clearProps: 'transform' }, 0.3);
     ScrollTrigger.create({ trigger: root, start: 'top 72%', once: true, onEnter: () => tl.play() });
     window.addEventListener('load', () => ScrollTrigger.refresh());
+
+    if (finaleEnabled()) initFinale(root, tl);
   }
 
-  // cursor-following preview image
-  if (root && fine && !reduce) {
-    const preview = root.querySelector<HTMLElement>('.svc-preview')!;
-    const imgs = preview.querySelectorAll<HTMLImageElement>('img');
-    imgs.forEach((im) => { im.loading = 'eager'; });
-    const x = gsap.quickTo(preview, 'x', { duration: 0.6, ease: 'power3' });
-    const y = gsap.quickTo(preview, 'y', { duration: 0.6, ease: 'power3' });
-    const rows = root.querySelectorAll<HTMLElement>('[data-svc-row]');
-    let lastX = 0;
+  // ---------------- desktop finale ----------------
+  function initFinale(section: HTMLElement, intro: gsap.core.Timeline) {
+    const work = document.getElementById('work');
+    const flood = section.querySelector<HTMLElement>('[data-svc-flood]');
+    if (!work || !flood) return;
+    document.documentElement.classList.add('svc-finale-on');
 
-    rows.forEach((row, i) => {
-      row.addEventListener('pointerenter', () => {
-        imgs.forEach((im, j) => im.classList.toggle('is-on', j === i));
-        gsap.to(preview, { autoAlpha: 1, scale: 1, duration: 0.5, ease: 'expo.out', overwrite: 'auto' });
+    // split every falling text into letters (words stay together so lines don't re-wrap)
+    const splitEl = (el: HTMLElement) => {
+      const words = (el.textContent || '').trim().split(/\s+/);
+      el.setAttribute('aria-label', el.textContent!.trim());
+      el.innerHTML = words.map((w) => `<span class="fw" aria-hidden="true">${
+        [...w].map((c) => `<span class="fc">${c.replace(/&/g, '&amp;').replace(/</g, '&lt;')}</span>`).join('')
+      }</span>`).join(' ');
+    };
+    section.querySelectorAll<HTMLElement>('[data-fall]').forEach(splitEl);
+    const pieces = [
+      ...section.querySelectorAll<HTMLElement>('.fc'),
+      ...section.querySelectorAll<HTMLElement>('.svc__rule'),
+    ];
+    const n = pieces.length;
+    const rnd = gsap.utils.random;
+    const rot = pieces.map((p) => (p.classList.contains('svc__rule') ? rnd(-4, 4) : rnd(-75, 75)));
+    const drift = pieces.map(() => rnd(-40, 40));
+    let drop: number[] = pieces.map(() => 0);
+
+    // the roller: drum, frame and handle (fixed, above the sliding Work section)
+    const roller = document.createElement('div');
+    roller.className = 'svc-roller';
+    roller.setAttribute('aria-hidden', 'true');
+    roller.innerHTML = '<span class="svc-roller__frame"></span><span class="svc-roller__handle"><i></i></span><span class="svc-roller__drum"></span>';
+    document.body.appendChild(roller);
+    const drum = roller.querySelector<HTMLElement>('.svc-roller__drum')!;
+
+    // realistic WebGL paint + 3D roller (falls back to the CSS versions without WebGL)
+    const glCanvas = document.createElement('canvas');
+    glCanvas.className = 'svc-gl';
+    glCanvas.setAttribute('aria-hidden', 'true');
+    document.body.appendChild(glCanvas);
+    let gl3d: { set(s: { level: number; wipeX: number; rollerAlpha: number }): void } | null = null;
+    import('../scripts/paintFinale').then(({ initPaintFinale }) => {
+      gl3d = initPaintFinale(glCanvas);
+      if (gl3d) document.documentElement.classList.add('svc-gl-on'); else glCanvas.remove();
+    });
+
+    // where each letter hits the floor (bottom of the screen), measured once the section is held
+    // the sticky heading would keep moving while the section is held: freeze it where it is
+    const head = section.querySelector<HTMLElement>('.services__head')!;
+    const lockHead = () => {
+      if (head.dataset.locked) return;
+      const r1 = head.getBoundingClientRect().top;
+      head.style.position = 'relative'; head.style.top = '0px';
+      const r2 = head.getBoundingClientRect().top;
+      head.style.top = `${r1 - r2}px`; head.dataset.locked = '1';
+    };
+    const unlockHead = () => { head.style.position = ''; head.style.top = ''; delete head.dataset.locked; };
+    const measure = () => {
+      lockHead();
+      const floor = innerHeight - 4;
+      drop = pieces.map((p) => {
+        const r = p.getBoundingClientRect();
+        const m = new DOMMatrixReadOnly(getComputedStyle(p).transform === 'none' ? undefined : getComputedStyle(p).transform);
+        const bottom = r.bottom - m.m42;
+        return Math.max(0, floor - rnd(0, 22) - bottom);
       });
+    };
+
+    const W = () => innerWidth;
+    const TOTAL = 3.5;                 // timeline length
+    const ROLL_AT = 2.1;               // roller phase start
+    const PIN_VH = 3.2;                // scroll length of the whole finale, in screen heights
+    const rollPx = () => innerHeight * PIN_VH * ((TOTAL - ROLL_AT) / TOTAL);
+
+    gsap.set(roller, { autoAlpha: 0, x: () => W() });
+    gsap.set(flood, { yPercent: 102 });
+
+    // letters are driven by hand from the timeline's time, so their fall distance
+    // can be measured fresh each time the section is held
+    const bounce = gsap.parseEase('bounce.out');
+    const startAt = pieces.map(() => Math.random() * 0.45);
+    const fadeAt = pieces.map((_, i) => 1.25 + (i / n) * 0.35);
+    const clamp01 = gsap.utils.clamp(0, 1);
+    let lastT = -1, needMeasure = true;
+    const render = () => {
+      const t = ft.time();
+      if (needMeasure && t > 0) { needMeasure = false; measure(); lastT = -1; }
+      if (t === lastT) return; lastT = t;
+      for (let i = 0; i < n; i++) {
+        const e = bounce(clamp01((t - startAt[i]) / 0.9));
+        const a = clamp01((t - fadeAt[i]) / 0.25);
+        const el = pieces[i];
+        if (e === 0) { el.style.transform = ''; el.style.opacity = ''; continue; }
+        el.style.transform = `translate3d(${drift[i] * e}px, ${drop[i] * e - 50 * a}px, 0) rotate(${rot[i] * e}deg)`;
+        el.style.opacity = a > 0 ? String(1 - a) : '';
+      }
+    };
+    // draws the WebGL paint from the timeline's own (already rendered) state
+    const syncGL = () => {
+      const t = ft.time();
+      const rx = Number(gsap.getProperty(roller, 'x')) || 0;
+      if (gl3d) {
+        const fyp = Number(gsap.getProperty(flood, 'yPercent')) || 0;
+        const done = t >= TOTAL - 0.001;
+        gl3d.set({
+          level: t <= 0 || done ? 0 : Math.max(0, Math.min(1, 1 - fyp / 102)),
+          wipeX: t >= ROLL_AT ? rx + 48 : 1e5,
+          rollerAlpha: t < ROLL_AT || done ? 0 : t < ROLL_AT + 1.1 ? 1 : 1 - Math.pow((t - ROLL_AT - 1.1) / (TOTAL - ROLL_AT - 1.1), 2),
+        });
+      } else {
+        drum.style.backgroundPositionX = `${rx * 0.9}px`;
+      }
+    };
+    const ft = gsap.timeline({ defaults: { ease: 'none' }, onUpdate: () => { render(); syncGL(); } });
+    // 1 — everything falls and bounces on the floor (see render); 2 — paint rises and swallows it
+    ft.set({}, {}, 0)
+      .set(flood, { visibility: 'visible' }, 0.95)
+      .fromTo(flood, { yPercent: 102 }, { yPercent: 0, duration: 0.95, ease: 'power1.inOut' }, 1.0)
+    // 3 — the roller cleans it off and Work slides in from the right
+      .fromTo(work, { x: () => W() }, { x: 0, duration: 1.1, ease: 'power1.inOut', immediateRender: true }, ROLL_AT)
+      // Work keeps its top at the top of the screen while the page is held
+      .fromTo(work, { y: () => -rollPx() }, { y: 0, duration: TOTAL - ROLL_AT, ease: 'none', immediateRender: true }, ROLL_AT)
+      .set(roller, { autoAlpha: 1 }, ROLL_AT)
+      // the drum rides on Work's left edge; the handle trails over the clean side
+      .fromTo(roller, { x: () => W() - 80 }, { x: -80, duration: 1.1, ease: 'power1.inOut' }, ROLL_AT)
+      .to(roller, { x: () => -Math.min(520, W() * 0.4), autoAlpha: 0, duration: TOTAL - ROLL_AT - 1.1, ease: 'power1.in' }, ROLL_AT + 1.1);
+
+    let workPlayed = false;
+    ScrollTrigger.create({
+      trigger: section,
+      start: 'bottom bottom',
+      end: () => `+=${innerHeight * PIN_VH}`,
+      pin: true,
+      scrub: true,
+      animation: ft,
+      invalidateOnRefresh: true,
+      anticipatePin: 1,
+      onToggle: (self) => {
+        if (self.isActive) { needMeasure = true; lastT = -1; } else if (self.progress === 0) { unlockHead(); }
+      },
+      onUpdate: (self) => {
+        const t = self.progress * TOTAL;
+        section.classList.toggle('is-falling', self.progress > 0.002);
+        section.classList.toggle('is-flooding', t > 0.95 && t < TOTAL);
+        if (!workPlayed && t > ROLL_AT + 0.35) { workPlayed = true; window.dispatchEvent(new Event('work:enter')); }
+      },
     });
-    root.querySelector('.services__list')!.addEventListener('pointerleave', () => {
-      gsap.to(preview, { autoAlpha: 0, scale: 0.9, duration: 0.4, ease: 'power2.out', overwrite: 'auto' });
-    });
-    gsap.set(preview, { scale: 0.9 });
-    root.addEventListener('pointermove', (e) => {
-      x(e.clientX + 40);
-      y(e.clientY);
-      const dx = e.clientX - lastX;
-      lastX = e.clientX;
-      gsap.to(preview, { rotation: gsap.utils.clamp(-6, 6, dx * 0.4), duration: 0.6, ease: 'power3', overwrite: false });
-    }, { passive: true });
+
+    // nav links to #work land at the end of the finale, not in the middle of it
+    document.addEventListener('click', (e) => {
+      const a = (e.target as HTMLElement).closest?.('a[href="#work"]');
+      const lenis = (window as any).__lenis;
+      if (!a) return;
+      e.preventDefault(); e.stopPropagation();
+      const st = ScrollTrigger.getAll().find((s) => s.pin === section);
+      const y = st ? st.end + 2 : work.offsetTop;
+      lenis ? lenis.scrollTo(y, { duration: 1.6 }) : window.scrollTo({ top: y, behavior: 'smooth' });
+    }, true);
+
+    void intro;
   }
 </script>
+
+<style is:global>
+  html.svc-finale-on body { overflow-x: clip; }
+  html.svc-finale-on #work { margin-top: -100vh; will-change: transform; }
+  .svc-gl { position: fixed; inset: 0; width: 100vw; height: 100vh; z-index: 39; pointer-events: none; visibility: hidden; }
+  html.svc-gl-on .svc-flood, html.svc-gl-on .svc-roller { display: none !important; }
+  .svc-roller { position: fixed; z-index: 40; top: 0; left: 0; height: 100vh; width: 420px; pointer-events: none; visibility: hidden; }
+  .svc-roller__drum {
+    position: absolute; left: 0; top: 6vh; bottom: 6vh; width: 96px; border-radius: 48px / 22px;
+    background:
+      linear-gradient(90deg, rgba(0,0,0,.42), rgba(0,0,0,.05) 30%, rgba(255,255,255,.28) 46%, rgba(0,0,0,0) 62%, rgba(0,0,0,.45)),
+      repeating-linear-gradient(90deg, #2A4DB0 0 3px, #1F3A8A 3px 7px, #3558BE 7px 9px, #1C3480 9px 14px);
+    box-shadow: -18px 0 40px -12px rgba(10, 20, 60, .45), inset 0 10px 18px rgba(255,255,255,.18), inset 0 -12px 18px rgba(0,0,0,.35);
+  }
+  .svc-roller__drum::before, .svc-roller__drum::after {
+    content: ''; position: absolute; left: 6px; right: 6px; height: 16px; border-radius: 50%;
+    background: radial-gradient(closest-side, #D9D4CA, #8E877B);
+  }
+  .svc-roller__drum::before { top: -6px; }
+  .svc-roller__drum::after { bottom: -6px; }
+  .svc-roller__frame {
+    position: absolute; left: 48px; top: calc(6vh - 10px); bottom: calc(6vh - 10px); width: 96px;
+    border: 7px solid #A9A398; border-left: 0; border-radius: 0 26px 26px 0;
+    box-shadow: 4px 6px 14px -6px rgba(0,0,0,.35);
+  }
+  .svc-roller__handle {
+    position: absolute; left: 140px; top: calc(50% - 18px); width: 260px; height: 36px; border-radius: 18px;
+    background: linear-gradient(180deg, #F0C04A, #E3A92B 45%, #B9821A);
+    box-shadow: 0 12px 24px -10px rgba(0,0,0,.45), inset 0 2px 0 rgba(255,255,255,.35);
+  }
+  .svc-roller__handle i { position: absolute; left: -14px; top: 6px; width: 30px; height: 24px; border-radius: 4px; background: linear-gradient(180deg, #D8D2C6, #8E877B); }
+</style>

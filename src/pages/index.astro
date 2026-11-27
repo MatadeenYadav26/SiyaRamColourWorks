@@ -11,7 +11,8 @@ import Footer from '../components/Footer.astro';
 const baseUrl = `${import.meta.env.BASE_URL.replace(/\/$/, '')}/`;
 ---
 <Base>
-  <link slot="head" rel="preload" as="image" href={`${baseUrl}frames/frame_0001.webp`} fetchpriority="high" />
+  <link slot="head" rel="preload" as="image" href={`${baseUrl}frames/frame_0001.webp`} fetchpriority="high" media="(min-width: 768px)" />
+  <link slot="head" rel="preload" as="image" href={`${baseUrl}images/hero-mobile-start.webp`} fetchpriority="high" media="(max-width: 767px)" />
   <Hero />
   <Intro />
   <Story />

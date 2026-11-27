@@ -1,46 +1,109 @@
 ---
 import { site, footer } from '../content/site';
 const tel = `tel:${site.phone}`;
+const tick = [...footer.ticker, ...footer.ticker];
 ---
 <footer id="contact" class="footer tint-charcoal" aria-label="Contact">
-  <div class="wrap">
-    <p class="label footer__label" data-foot-fade>{footer.label}</p>
-
-    <div class="footer__cols">
-      <div class="fcol" data-foot-fade>
-        <p class="fcol__head">{footer.cols.whatsapp}</p>
-        <a class="fcol__big" href={site.whatsapp} target="_blank" rel="noopener">{footer.whatsappCta}</a>
-        <p class="fcol__small">{footer.callCta} <a href={tel}>{site.phoneDisplay}</a></p>
-      </div>
-      <div class="fcol" data-foot-fade>
-        <p class="fcol__head">{footer.cols.instagram}</p>
-        <a class="fcol__big fcol__big--handle" href={site.INSTAGRAM_URL} target="_blank" rel="noopener">{footer.instagramHandle}</a>
-        <p class="fcol__small">{footer.instagramCta}</p>
-      </div>
-      <div class="fcol" data-foot-fade>
-        <p class="fcol__head">{footer.cols.studio}</p>
-        <p class="fcol__text">{site.address}</p>
-        <p class="fcol__small"><a href={`mailto:${site.email}`}>{site.email}</a></p>
-      </div>
-      <nav class="fcol" aria-label="Footer" data-foot-fade>
-        <p class="fcol__head">{footer.cols.index}</p>
-        <ul role="list">
-          {footer.links.map((l) => <li><a href={l.href}>{l.label}</a></li>)}
-        </ul>
-      </nav>
+  <!-- 1 · closing call to action -->
+  <div class="wrap footer__cta">
+    <div class="footer__cta-text">
+      <p class="label footer__label" data-foot-fade>{footer.label}</p>
+      <h2 class="footer__title">
+        {footer.cta.lines.map((l) => <span class="line"><span set:html={l} /></span>)}
+      </h2>
+      <p class="footer__lead" data-foot-fade>{footer.cta.lead}</p>
     </div>
+    <a class="badge" href={site.whatsapp} target="_blank" rel="noopener" data-magnetic data-cursor aria-label="Message us on WhatsApp">
+      <svg class="badge__ring" viewBox="0 0 200 200" aria-hidden="true">
+        <defs><path id="badgeCircle" d="M100,100 m-78,0 a78,78 0 1,1 156,0 a78,78 0 1,1 -156,0" /></defs>
+        <text><textPath href="#badgeCircle" textLength="488">{footer.cta.badge}</textPath></text>
+      </svg>
+      <span class="badge__core" aria-hidden="true">
+        <svg class="badge__wa" viewBox="0 0 24 24" width="30" height="30"><path fill="currentColor" d="M17.47 14.38c-.3-.15-1.76-.87-2.03-.97-.27-.1-.47-.15-.67.15-.2.3-.77.97-.94 1.17-.17.2-.35.22-.64.07-.3-.15-1.26-.46-2.4-1.48-.89-.79-1.49-1.77-1.66-2.07-.17-.3-.02-.46.13-.61.13-.13.3-.35.45-.52.15-.17.2-.3.3-.5.1-.2.05-.37-.02-.52-.08-.15-.67-1.62-.92-2.22-.24-.58-.49-.5-.67-.51h-.57c-.2 0-.52.07-.79.37-.27.3-1.04 1.02-1.04 2.48s1.07 2.88 1.21 3.08c.15.2 2.1 3.2 5.08 4.49.71.31 1.26.49 1.69.62.71.23 1.36.2 1.87.12.57-.08 1.76-.72 2.01-1.42.25-.7.25-1.29.17-1.42-.07-.12-.27-.2-.57-.35M12.05 21.5h-.01a9.4 9.4 0 0 1-4.8-1.31l-.34-.2-3.56.93.95-3.47-.22-.36a9.4 9.4 0 0 1-1.44-5.02c0-5.2 4.23-9.42 9.43-9.42 2.52 0 4.88.98 6.66 2.76a9.36 9.36 0 0 1 2.76 6.67c0 5.2-4.23 9.42-9.43 9.42M20.07 3.98A11.3 11.3 0 0 0 12.05.66C5.8.66.72 5.74.72 11.99c0 2 .52 3.95 1.52 5.66L.62 23.34l5.82-1.53a11.3 11.3 0 0 0 5.6 1.43h.01c6.25 0 11.33-5.08 11.34-11.33 0-3.03-1.18-5.87-3.32-8.01"/></svg>
+        <svg class="badge__arrow" viewBox="0 0 24 24" width="22" height="22"><path d="M6 18 18 6M8 6h10v10" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></svg>
+      </span>
+    </a>
+  </div>
 
-    <div class="footer__mark" aria-hidden="true">
-      <span class="footer__word">{footer.wordmark}</span>
-      <span class="footer__stroke"></span>
+  <!-- 2 · moving service ticker -->
+  <div class="ticker" aria-hidden="true">
+    <div class="ticker__track" data-ticker>
+      {tick.map((t, i) => (
+        <span class={`ticker__item ${i % 2 ? 'is-outline' : ''}`}>{t}<i class="ticker__dot" /></span>
+      ))}
     </div>
+  </div>
 
-    <div class="footer__base">
-      <div class="footer__brand">
-        <img class="footer__logo" src={site.logo} alt="Siya Ram Colour Works logo" width="276" height="160" loading="lazy" />
-        <p>{footer.copyright}</p>
-      </div>
-      <a href={footer.credits.href} target="_blank" rel="noopener">{footer.credits.label}</a>
+  <!-- 3 · contact columns -->
+  <div class="wrap footer__cols">
+    <div class="fcol" data-foot-col>
+      <p class="fcol__head">{footer.cols.whatsapp}</p>
+      <a class="plink plink--big" href={site.whatsapp} target="_blank" rel="noopener"><span>{footer.whatsappCta}</span></a>
+      <p class="fcol__small">{footer.callCta} <a class="plink" href={tel}><span>{site.phoneDisplay}</span></a></p>
+    </div>
+    <div class="fcol" data-foot-col>
+      <p class="fcol__head">{footer.cols.instagram}</p>
+      <a class="plink plink--handle" href={site.INSTAGRAM_URL} target="_blank" rel="noopener"><span set:html={footer.instagramHandle.split('.').join('.<wbr>')} /></a>
+      <p class="fcol__small">{footer.instagramCta}</p>
+    </div>
+    <div class="fcol" data-foot-col>
+      <p class="fcol__head">{footer.cols.studio}</p>
+      <p class="fcol__text">{site.address}</p>
+      <p class="fcol__small"><a class="plink" href={`mailto:${site.email}`}><span>{site.email}</span></a></p>
+    </div>
+    <nav class="fcol" aria-label="Footer" data-foot-col>
+      <p class="fcol__head">{footer.cols.index}</p>
+      <ul role="list" class="findex">
+        {footer.links.map((l, i) => (
+          <li>
+            <a class="findex__a" href={l.href} data-foot-jump>
+              <span class="findex__no">{String(i + 1).padStart(2, '0')}</span>
+              <span class="findex__label">{l.label}</span>
+              <svg class="findex__arr" viewBox="0 0 24 24" width="14" height="14" aria-hidden="true"><path d="M5 12h14M13 6l6 6-6 6" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></svg>
+            </a>
+          </li>
+        ))}
+      </ul>
+    </nav>
+  </div>
+
+  <!-- 4 · the name you can paint -->
+  <div class="wrap footer__mark">
+    <svg class="mark" viewBox="0 0 1000 268" role="img" aria-label={footer.wordmark} data-mark>
+      <defs>
+        <clipPath id="markClip">
+          <text class="mark__t" x="6" y="200" textLength="986" lengthAdjust="spacingAndGlyphs">{footer.wordmark}</text>
+        </clipPath>
+        <filter id="markRough" x="-5%" y="-20%" width="110%" height="140%">
+          <feTurbulence type="fractalNoise" baseFrequency="0.04" numOctaves="2" seed="7" />
+          <feDisplacementMap in="SourceGraphic" scale="16" />
+        </filter>
+      </defs>
+      <text class="mark__t mark__outline" x="6" y="200" textLength="986" lengthAdjust="spacingAndGlyphs">{footer.wordmark}</text>
+      <g clip-path="url(#markClip)"><g class="mark__paint" data-mark-paint></g></g>
+    </svg>
+    <p class="mark__hint" data-mark-hint>
+      <svg viewBox="0 0 24 24" width="16" height="16" aria-hidden="true"><rect x="3" y="4" width="13" height="6" rx="2" fill="none" stroke="currentColor" stroke-width="1.6"/><path d="M16 7h3v4l-7 1v3" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"/><rect x="10.5" y="15" width="3" height="6" rx="1.5" fill="currentColor"/></svg>
+      {footer.paintHint}
+    </p>
+  </div>
+
+  <!-- 5 · base line -->
+  <div class="wrap footer__base">
+    <div class="footer__brand">
+      <img class="footer__logo" src={site.logo} alt="Siya Ram Colour Works logo" width="276" height="160" loading="lazy" decoding="async" />
+      <p>{footer.copyright}</p>
+    </div>
+    <p class="footer__clock"><span class="footer__live" aria-hidden="true"></span>{footer.clockLabel} <span data-clock>—</span></p>
+    <div class="footer__end">
+      <a class="footer__credits" href={footer.credits.href} target="_blank" rel="noopener">{footer.credits.label}</a>
+      <button type="button" class="totop" data-totop data-magnetic>
+        <span class="totop__label">{footer.backToTop}</span>
+        <span class="totop__circle" aria-hidden="true">
+          <svg viewBox="0 0 24 24" width="16" height="16"><path d="M12 19V5M6 11l6-6 6 6" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></svg>
+          <svg viewBox="0 0 24 24" width="16" height="16"><path d="M12 19V5M6 11l6-6 6 6" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></svg>
+        </span>
+      </button>
     </div>
   </div>
 </footer>
@@ -48,106 +111,303 @@ const tel = `tel:${site.phone}`;
 <style>
   .footer { position: relative; z-index: 3; padding-block: var(--section-y) clamp(24px, 3vw, 40px); overflow: hidden; }
   .footer a { color: inherit; text-decoration: none; }
-  .footer__label { color: rgba(244, 240, 232, 0.6); padding-top: 1.2em; border-top: 1px solid rgba(244, 240, 232, 0.2); max-width: 24%; }
+  .footer :global(em) { font-style: italic; color: var(--gold); }
+  .hair { border-top: 1px solid rgba(244, 240, 232, 0.16); }
 
+  /* ---------- CTA ---------- */
+  .footer__cta { display: flex; align-items: flex-end; justify-content: space-between; gap: clamp(24px, 5vw, 80px); }
+  .footer__label { color: rgba(244, 240, 232, 0.55); padding-top: 1.2em; border-top: 1px solid rgba(244, 240, 232, 0.2); min-width: min(280px, 60%); }
+  .footer__title {
+    margin: clamp(28px, 4vw, 56px) 0 0; font-family: var(--serif); font-weight: 400;
+    font-size: clamp(48px, 8.6vw, 150px); line-height: 0.92; letter-spacing: -0.035em; color: var(--paper);
+  }
+  .footer__title .line { display: block; overflow: hidden; padding-bottom: 0.08em; }
+  .footer__title .line > span { display: inline-block; }
+  .footer__title .line:nth-child(2) { padding-left: 0.9em; }
+  .footer__lead { margin: 22px 0 0; max-width: 40ch; color: rgba(244, 240, 232, 0.62); font-size: var(--fs-body); line-height: 1.55; }
+
+  .badge {
+    position: relative; flex: none; width: clamp(150px, 14vw, 210px); aspect-ratio: 1; border-radius: 50%;
+    display: grid; place-items: center; color: var(--paper); margin-bottom: 8px;
+  }
+  .badge__ring { position: absolute; inset: 0; width: 100%; height: 100%; animation: badgeSpin 16s linear infinite; }
+  .badge__ring text { fill: rgba(244, 240, 232, 0.78); font-family: var(--sans); font-size: 15.5px; font-weight: 600; letter-spacing: 0.14em; text-transform: uppercase; }
+  .badge__core {
+    position: relative; width: 56%; aspect-ratio: 1; border-radius: 50%;
+    background: var(--gold); color: var(--ink); display: grid; place-items: center; overflow: hidden;
+    box-shadow: 0 18px 40px -16px rgba(224, 165, 38, 0.55);
+    transition: transform 0.6s var(--ease-expo), background-color 0.4s;
+  }
+  .badge__wa, .badge__arrow { grid-area: 1 / 1; transition: transform 0.55s var(--ease-expo), opacity 0.3s; }
+  .badge__arrow { transform: translate(-260%, 260%); }
+  .badge:hover .badge__core, .badge:focus-visible .badge__core { transform: scale(1.12); background: #F2B73A; }
+  .badge:hover .badge__wa, .badge:focus-visible .badge__wa { transform: translate(260%, -260%); }
+  .badge:hover .badge__arrow, .badge:focus-visible .badge__arrow { transform: none; }
+  .badge:hover .badge__ring { animation-duration: 6s; }
+  @keyframes badgeSpin { to { transform: rotate(360deg); } }
+
+  /* ---------- ticker ---------- */
+  .ticker {
+    margin-top: clamp(64px, 9vw, 130px); padding-block: clamp(16px, 1.8vw, 26px);
+    border-block: 1px solid rgba(244, 240, 232, 0.14); overflow: hidden; white-space: nowrap;
+    mask-image: linear-gradient(90deg, transparent, #000 8%, #000 92%, transparent);
+  }
+  .ticker__track { display: inline-flex; will-change: transform; animation: tick 38s linear infinite; }
+  :global(html.has-cursor) .ticker__track { animation: none; }
+  .ticker__item {
+    display: inline-flex; align-items: center; gap: clamp(22px, 2.6vw, 44px); padding-right: clamp(22px, 2.6vw, 44px);
+    font-family: var(--serif); font-style: italic; font-size: clamp(30px, 4.4vw, 68px); line-height: 1; color: var(--paper);
+  }
+  .ticker__item.is-outline { color: transparent; -webkit-text-stroke: 1px rgba(244, 240, 232, 0.55); }
+  .ticker__dot { display: inline-block; width: 0.22em; height: 0.22em; border-radius: 46% 54% 50% 50% / 55% 45% 55% 45%; background: var(--gold); }
+  .ticker__item:nth-child(3n+2) .ticker__dot { background: #4A6FD1; }
+  .ticker__item:nth-child(3n) .ticker__dot { background: #D06A4A; }
+  @keyframes tick { to { transform: translateX(-50%); } }
+
+  /* ---------- columns ---------- */
   .footer__cols {
-    display: grid;
-    grid-template-columns: minmax(0, 4fr) minmax(0, 3fr) minmax(0, 3fr) minmax(0, 2fr);
-    gap: clamp(24px, 4vw, 72px);
-    margin-top: clamp(40px, 6vw, 88px);
+    display: grid; grid-template-columns: minmax(0, 4fr) minmax(0, 3fr) minmax(0, 3fr) minmax(0, 2fr);
+    gap: clamp(24px, 4vw, 72px); margin-top: clamp(48px, 6vw, 96px);
   }
-  .fcol { padding-top: 16px; border-top: 1px solid rgba(244, 240, 232, 0.2); }
-  .fcol { min-width: 0; }
-  .fcol__head { margin: 0 0 18px; font-family: var(--sans); font-size: var(--fs-label); letter-spacing: 0.08em; text-transform: uppercase; color: rgba(244, 240, 232, 0.6); }
-  .fcol__big {
-    position: relative;
-    display: inline-block;
-    font-family: var(--serif); font-size: clamp(26px, 2.6vw, 40px); line-height: 1.05; letter-spacing: -0.01em;
-    color: var(--paper);
-    padding-bottom: 4px;
-  }
-  .fcol__big--handle { font-size: clamp(20px, 1.9vw, 28px); line-height: 1.15; overflow-wrap: anywhere; max-width: 100%; }
-  .fcol__big::after {
-    content: ''; position: absolute; left: 0; right: 0; bottom: 0; height: 1px;
-    background: var(--gold);
-    transform: scaleX(0); transform-origin: left center;
-    transition: transform 0.5s var(--ease-out);
-  }
-  .fcol__big:hover::after, .fcol__big:focus-visible::after { transform: scaleX(1); }
+  .fcol { min-width: 0; padding-top: 16px; border-top: 1px solid rgba(244, 240, 232, 0.2); }
+  .fcol__head { margin: 0 0 18px; font-size: var(--fs-label); letter-spacing: 0.08em; text-transform: uppercase; color: rgba(244, 240, 232, 0.55); }
   .fcol__text { margin: 0; font-family: var(--serif); font-size: clamp(22px, 2vw, 30px); line-height: 1.15; color: var(--paper); }
   .fcol__small { margin: 12px 0 0; font-size: var(--fs-label); color: rgba(244, 240, 232, 0.6); line-height: 1.5; }
-  .fcol__small a { color: #8EA3E6; overflow-wrap: anywhere; }
-  .fcol ul { list-style: none; margin: 0; padding: 0; display: grid; gap: 8px; }
-  .fcol li a { font-size: 15px; color: var(--paper); transition: color 0.3s; }
-  .fcol li a:hover, .fcol li a:focus-visible { color: var(--gold); }
 
-  .footer__mark { position: relative; margin-top: clamp(56px, 9vw, 140px); line-height: 0.82; }
-  .footer__word {
-    display: block;
-    font-family: var(--serif); font-weight: 400; font-style: italic;
-    font-size: clamp(72px, 21vw, 360px);
-    letter-spacing: -0.04em;
-    color: var(--paper);
-    padding-bottom: 0.08em;
-    margin-left: -0.04em;
+  /* links that get painted on hover: a gold band rolls in behind the text */
+  .plink { display: inline; color: var(--paper); overflow-wrap: anywhere; }
+  .plink span {
+    background-image: linear-gradient(transparent 8%, var(--gold) 8%, var(--gold) 92%, transparent 92%);
+    background-repeat: no-repeat; background-size: 0% 100%; background-position: left center;
+    padding: 0 0.12em; margin: 0 -0.12em; border-radius: 3px;
+    box-decoration-break: clone; -webkit-box-decoration-break: clone;
+    transition: background-size 0.55s var(--ease-expo), color 0.3s;
   }
-  .footer__stroke {
-    position: absolute; left: 0.4%; bottom: 0.02em;
-    width: 62%; height: clamp(8px, 1.4vw, 22px);
-    background: var(--gold);
-    border-radius: 2px;
-    transform-origin: left center;
-    opacity: 0.9;
-  }
+  .plink:hover span, .plink:focus-visible span { background-size: 100% 100%; color: var(--ink); }
+  .fcol__small .plink { color: #A9B8EC; }
+  .plink--big { font-family: var(--serif); font-size: clamp(30px, 3vw, 46px); line-height: 1.15; letter-spacing: -0.01em; }
+  .plink--handle { font-family: var(--serif); font-size: clamp(19px, 1.6vw, 25px); line-height: 1.3; overflow-wrap: normal; }
 
+  .findex { list-style: none; margin: 0; padding: 0; display: grid; gap: 2px; }
+  .findex__a {
+    position: relative; display: flex; align-items: baseline; gap: 12px; padding: 6px 0; color: var(--paper);
+    font-size: 16px; overflow: hidden;
+  }
+  .findex__no { font-size: 11px; letter-spacing: 0.1em; color: rgba(244, 240, 232, 0.4); transition: color 0.3s; }
+  .findex__label { transition: transform 0.5s var(--ease-expo), color 0.3s; }
+  .findex__arr { align-self: center; opacity: 0; transform: translateX(-10px); transition: transform 0.5s var(--ease-expo), opacity 0.3s; color: var(--gold); }
+  .findex__a:hover .findex__label, .findex__a:focus-visible .findex__label { transform: translateX(6px); color: var(--gold); }
+  .findex__a:hover .findex__no { color: var(--gold); }
+  .findex__a:hover .findex__arr, .findex__a:focus-visible .findex__arr { opacity: 1; transform: translateX(6px); }
+
+  /* ---------- paintable name ---------- */
+  .footer__mark { position: relative; margin-top: clamp(56px, 8vw, 120px); }
+  .mark { display: block; width: 100%; height: auto; overflow: visible; touch-action: pan-y; }
+  .mark__t { font-family: var(--serif); font-style: italic; font-weight: 400; font-size: 236px; letter-spacing: -6px; }
+  .mark__outline { fill: rgba(244, 240, 232, 0.05); stroke: rgba(244, 240, 232, 0.32); stroke-width: 1.2; vector-effect: non-scaling-stroke; }
+  .mark__paint :global(path) { fill: none; stroke-linecap: round; stroke-linejoin: round; }
+  .mark__hint {
+    display: inline-flex; align-items: center; gap: 8px; margin: 10px 0 0;
+    font-size: var(--fs-label); letter-spacing: 0.06em; color: rgba(244, 240, 232, 0.5);
+    transition: opacity 0.6s;
+  }
+  .mark__hint.is-used { opacity: 0; }
+
+  /* ---------- base ---------- */
   .footer__base {
-    display: flex; justify-content: space-between; align-items: baseline; gap: 16px; flex-wrap: wrap;
-    margin-top: clamp(28px, 3vw, 48px); padding-top: 18px;
-    border-top: 1px solid rgba(244, 240, 232, 0.2);
+    display: grid; grid-template-columns: 1fr auto 1fr; align-items: center; gap: 16px;
+    margin-top: clamp(28px, 3vw, 48px); padding-top: 18px; border-top: 1px solid rgba(244, 240, 232, 0.2);
     font-size: var(--fs-label); color: rgba(244, 240, 232, 0.6);
   }
   .footer__base p { margin: 0; }
-  .footer__base { align-items: center; }
   .footer__brand { display: flex; align-items: center; gap: 14px; }
   .footer__logo { height: clamp(36px, 3.4vw, 52px); width: auto; display: block; filter: brightness(0) invert(1); opacity: 0.92; }
-  .footer__base a { text-decoration: underline; text-underline-offset: 3px; }
-  .footer__base a:hover { color: var(--paper); }
+  .footer__clock { display: inline-flex; align-items: center; gap: 8px; font-variant-numeric: tabular-nums; }
+  .footer__live { width: 7px; height: 7px; border-radius: 50%; background: #4FBF7A; box-shadow: 0 0 0 0 rgba(79, 191, 122, 0.5); animation: live 2.4s ease-out infinite; }
+  @keyframes live { 70% { box-shadow: 0 0 0 8px rgba(79, 191, 122, 0); } 100% { box-shadow: 0 0 0 0 rgba(79, 191, 122, 0); } }
+  .footer__end { display: flex; align-items: center; justify-content: flex-end; gap: 22px; }
+  .footer__credits { text-decoration: underline !important; text-underline-offset: 3px; }
+  .footer__credits:hover { color: var(--paper); }
+
+  .totop { display: inline-flex; align-items: center; gap: 12px; padding: 0; border: 0; background: none; color: var(--paper); font: inherit; cursor: pointer; }
+  .totop__label { font-size: var(--fs-label); letter-spacing: 0.06em; }
+  .totop__circle {
+    position: relative; width: 46px; height: 46px; border-radius: 50%; overflow: hidden;
+    border: 1px solid rgba(244, 240, 232, 0.3); display: grid; place-items: center;
+    transition: background-color 0.4s, border-color 0.4s, color 0.4s;
+  }
+  .totop__circle svg { grid-area: 1 / 1; transition: transform 0.55s var(--ease-expo); }
+  .totop__circle svg:last-child { transform: translateY(160%); }
+  .totop:hover .totop__circle, .totop:focus-visible .totop__circle { background: var(--gold); border-color: var(--gold); color: var(--ink); }
+  .totop:hover .totop__circle svg:first-child { transform: translateY(-160%); }
+  .totop:hover .totop__circle svg:last-child { transform: none; }
 
   @media (max-width: 860px), (hover: none) {
-    .footer__label { max-width: none; }
+    .footer__cta { flex-direction: column; align-items: flex-start; }
+    .badge { align-self: flex-end; width: 132px; margin-top: 12px; }
+    .footer__title .line:nth-child(2) { padding-left: 0.6em; }
     .footer__cols { grid-template-columns: 1fr 1fr; row-gap: 40px; }
+    .mark__hint { display: none; }
+    .footer__base { grid-template-columns: 1fr; justify-items: start; gap: 14px; }
+    .footer__end { width: 100%; justify-content: space-between; }
   }
   @media (max-width: 520px) {
     .footer__cols { grid-template-columns: 1fr; row-gap: 32px; }
-    .footer__stroke { width: 80%; }
+  }
+  @media (prefers-reduced-motion: reduce) {
+    .badge__ring, .ticker__track, .footer__live { animation: none; }
   }
 </style>
 
 <script>
   import { gsap } from 'gsap';
   import { ScrollTrigger } from 'gsap/ScrollTrigger';
+  import { initMagnetic } from '../scripts/magnetic';
   gsap.registerPlugin(ScrollTrigger);
 
   const root = document.getElementById('contact');
   const reduce = matchMedia('(prefers-reduced-motion: reduce)').matches;
+  const fine = matchMedia('(pointer: fine)').matches && !matchMedia('(hover: none)').matches;
 
-  if (root && !reduce) {
-    const fades = root.querySelectorAll('[data-foot-fade]');
-    const word = root.querySelector('.footer__word');
-    const stroke = root.querySelector('.footer__stroke');
-    gsap.set(fades, { autoAlpha: 0, y: 24 });
-    gsap.set(word, { clipPath: 'inset(0 100% 0 0)' });
-    gsap.set(stroke, { scaleX: 0 });
+  if (root) {
+    initMagnetic('#contact [data-magnetic]', 0.35);
+    // the footer has its own WhatsApp badge, so the floating button steps aside here
+    new IntersectionObserver(([e]) => document.documentElement.classList.toggle('footer-in-view', e.isIntersecting), { rootMargin: '0px 0px -25% 0px' }).observe(root);
 
-    const tl = gsap.timeline({ paused: true, defaults: { ease: 'expo.out', duration: 1.1 } });
-    tl.to(fades, { autoAlpha: 1, y: 0, duration: 0.8, stagger: 0.08 });
-    ScrollTrigger.create({ trigger: root, start: 'top 72%', once: true, onEnter: () => tl.play() });
+    // ---------- entrance ----------
+    if (!reduce) {
+      const lines = root.querySelectorAll('.footer__title .line > span');
+      const fades = root.querySelectorAll('[data-foot-fade]');
+      const cols = root.querySelectorAll('[data-foot-col]');
+      const badge = root.querySelector('.badge');
+      gsap.set(lines, { yPercent: 110 });
+      gsap.set(fades, { autoAlpha: 0, y: 20 });
+      gsap.set(cols, { autoAlpha: 0, y: 30 });
+      gsap.set(badge, { scale: 0.6, rotate: -60, autoAlpha: 0 });
+      const tl = gsap.timeline({ paused: true, defaults: { ease: 'expo.out', duration: 1.2 } });
+      tl.to(lines, { yPercent: 0, stagger: 0.1 })
+        .to(fades, { autoAlpha: 1, y: 0, duration: 0.9, stagger: 0.08 }, 0.2)
+        .to(badge, { scale: 1, rotate: 0, autoAlpha: 1, duration: 1.4 }, 0.3);
+      ScrollTrigger.create({ trigger: root, start: 'top 75%', once: true, onEnter: () => tl.play() });
+      ScrollTrigger.create({
+        trigger: root.querySelector('.footer__cols'), start: 'top 88%', once: true,
+        onEnter: () => gsap.to(cols, { autoAlpha: 1, y: 0, duration: 1, stagger: 0.09, ease: 'expo.out' }),
+      });
+    }
 
-    const mark = gsap.timeline({ paused: true });
-    mark.to(stroke, { scaleX: 1, duration: 0.9, ease: 'power3.inOut' })
-        .to(word, { clipPath: 'inset(0 0% 0 0)', duration: 1.4, ease: 'power4.inOut' }, 0.15);
-    ScrollTrigger.create({ trigger: root.querySelector('.footer__mark'), start: 'top 88%', once: true, onEnter: () => mark.play() });
+    // ---------- ticker: on desktop it speeds up and leans with scroll ----------
+    const track = root.querySelector<HTMLElement>('[data-ticker]');
+    if (track && fine && !reduce) {
+      let x = 0, boost = 0, lastY = scrollY, half = track.scrollWidth / 2, on = false;
+      const setX = gsap.quickSetter(track, 'x', 'px');
+      const setSkew = gsap.quickSetter(track, 'skewX', 'deg');
+      addEventListener('resize', () => { half = track.scrollWidth / 2; });
+      new IntersectionObserver(([e]) => { on = e.isIntersecting; }).observe(track);
+      gsap.ticker.add((_, dtMs) => {
+        const dy = scrollY - lastY; lastY = scrollY;
+        if (!on) return;
+        boost += (Math.min(Math.abs(dy) * 2.2, 60) - boost) * 0.08;
+        x -= (60 + boost * 22) * (dtMs / 1000) * (dy < 0 ? -1 : 1);
+        if (x <= -half) x += half;
+        if (x > 0) x -= half;
+        setX(x);
+        setSkew(-Math.min(boost * 0.12, 8) * Math.sign(dy || 1));
+      });
+    }
 
-    window.addEventListener('load', () => ScrollTrigger.refresh());
+    // ---------- live Surat clock ----------
+    const clock = root.querySelector('[data-clock]');
+    const fmt = new Intl.DateTimeFormat('en-IN', { timeZone: 'Asia/Kolkata', hour: 'numeric', minute: '2-digit', hour12: true });
+    const tickClock = () => { if (clock) clock.textContent = fmt.format(new Date()).toUpperCase(); };
+    tickClock(); setInterval(tickClock, 20000);
+
+    // ---------- smooth jumps + back to top ----------
+    const go = (target: HTMLElement | number) => {
+      const lenis = (window as any).__lenis;
+      if (lenis) lenis.scrollTo(target, { duration: 1.6 });
+      else if (typeof target === 'number') scrollTo({ top: target, behavior: reduce ? 'auto' : 'smooth' });
+      else target.scrollIntoView({ behavior: reduce ? 'auto' : 'smooth' });
+    };
+    root.querySelectorAll<HTMLAnchorElement>('[data-foot-jump]').forEach((a) => a.addEventListener('click', (e) => {
+      const t = document.querySelector<HTMLElement>(a.getAttribute('href') || '');
+      if (!t) return;
+      e.preventDefault(); go(t);
+    }));
+    root.querySelector('[data-totop]')?.addEventListener('click', () => go(0));
+
+    // ---------- the paintable name ----------
+    const svg = root.querySelector<SVGSVGElement>('[data-mark]');
+    const layer = root.querySelector<SVGGElement>('[data-mark-paint]');
+    const hint = root.querySelector('[data-mark-hint]');
+    const NS = 'http://www.w3.org/2000/svg';
+    const COLS = ['#E0A526', '#4A6FD1', '#D06A4A', '#F2C14E', '#7FA38C'];
+    let ci = 0;
+    if (svg && layer) {
+      if (fine) layer.setAttribute('filter', 'url(#markRough)'); // brushy edges on desktop only
+
+      const stroke = (d: string, col: string, w: number) => {
+        const g = document.createElementNS(NS, 'g');
+        const p = document.createElementNS(NS, 'path');
+        p.setAttribute('d', d); p.setAttribute('stroke', col); p.setAttribute('stroke-width', String(w));
+        const hl = document.createElementNS(NS, 'path'); // wet highlight
+        hl.setAttribute('d', d); hl.setAttribute('stroke', 'rgba(255,255,255,0.22)');
+        hl.setAttribute('stroke-width', String(w * 0.14)); hl.setAttribute('transform', `translate(${-w * 0.16} ${-w * 0.2})`);
+        g.append(p, hl); layer.append(g);
+        return { g, p, hl };
+      };
+      const fadeLater = (g: SVGGElement, delay: number) =>
+        gsap.to(g, { opacity: 0, duration: 2.4, delay, ease: 'power1.in', onComplete: () => g.remove() });
+
+      // 1) on arrival, a roller sweeps a zigzag of paint across the name
+      const sweep = () => {
+        const pts: string[] = [];
+        for (let i = 0; i <= 9; i++) pts.push(`${20 + i * 108},${i % 2 ? 60 : 225}`);
+        const s = stroke(`M${pts.join(' L')}`, COLS[0], 96);
+        const len = s.p.getTotalLength();
+        [s.p, s.hl].forEach((el) => { el.setAttribute('stroke-dasharray', `${len}`); el.setAttribute('stroke-dashoffset', `${len}`); });
+        gsap.to([s.p, s.hl], { attr: { 'stroke-dashoffset': 0 }, duration: reduce ? 0 : 2.2, ease: 'power2.inOut' });
+        if (fine) fadeLater(s.g, 5);
+      };
+      ScrollTrigger.create({ trigger: svg, start: 'top 85%', once: true, onEnter: sweep });
+
+      // 2) desktop: the roller paints wherever it moves over the name
+      if (fine && !reduce) {
+        let cur: { g: SVGGElement; p: SVGPathElement; hl: SVGPathElement; pts: number[][] } | null = null;
+        let last: number[] | null = null;
+        const pt = svg.createSVGPoint();
+        const toLocal = (e: PointerEvent) => {
+          pt.x = e.clientX; pt.y = e.clientY;
+          const m = svg.getScreenCTM(); if (!m) return null;
+          const q = pt.matrixTransform(m.inverse()); return [q.x, q.y];
+        };
+        const pathOf = (a: number[][]) => {
+          let d = `M${a[0][0].toFixed(1)},${a[0][1].toFixed(1)}`;
+          for (let i = 1; i < a.length - 1; i++) {
+            const mx = (a[i][0] + a[i + 1][0]) / 2, my = (a[i][1] + a[i + 1][1]) / 2;
+            d += ` Q${a[i][0].toFixed(1)},${a[i][1].toFixed(1)} ${mx.toFixed(1)},${my.toFixed(1)}`;
+          }
+          const z = a[a.length - 1]; return d + ` L${z[0].toFixed(1)},${z[1].toFixed(1)}`;
+        };
+        const end = () => { if (cur) fadeLater(cur.g, 4); cur = null; last = null; };
+        svg.addEventListener('pointermove', (e) => {
+          const q = toLocal(e); if (!q) return;
+          if (last && Math.hypot(q[0] - last[0], q[1] - last[1]) < 5) return;
+          if (!cur || cur.pts.length > 70) {
+            const tail = cur ? cur.pts[cur.pts.length - 1] : null;
+            end();
+            ci = (ci + 1) % COLS.length;
+            const w = 70 + Math.random() * 30;
+            const s = stroke('M0,0', COLS[ci], w);
+            cur = { ...s, pts: tail ? [tail] : [] };
+            hint?.classList.add('is-used');
+          }
+          cur.pts.push(q); last = q;
+          if (cur.pts.length > 1) { const d = pathOf(cur.pts); cur.p.setAttribute('d', d); cur.hl.setAttribute('d', d); }
+          // keep the DOM light
+          if (layer.childElementCount > 24) layer.firstElementChild?.remove();
+        });
+        svg.addEventListener('pointerleave', end);
+      }
+    }
   }
 </script>
