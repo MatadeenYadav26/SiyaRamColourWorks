@@ -23,6 +23,8 @@ const jsonLd = {
   founder: { '@type': 'Person', name: 'Vinod Yadav' },
   address: { '@type': 'PostalAddress', addressLocality: 'Surat', addressRegion: 'Gujarat', addressCountry: 'IN' },
   areaServed: { '@type': 'City', name: 'Surat' },
+  openingHoursSpecification: [{ '@type': 'OpeningHoursSpecification', dayOfWeek: ['Monday','Tuesday','Wednesday','Thursday','Friday','Saturday','Sunday'], opens: '09:00', closes: '19:00' }],
+  priceRange: '₹₹',
   sameAs: [site.INSTAGRAM_URL],
 };
 ---
