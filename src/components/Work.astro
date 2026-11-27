@@ -37,7 +37,7 @@ const rows = Array.from({ length: rowCount }, (_, r) => all.slice(r * per, (r + 
                 <li class="tile" style={`aspect-ratio: ${it.w} / ${it.h}`}>
                   <figure>
                     <img src={it.src} alt={set === 0 ? it.caption : ''} width={it.w} height={it.h}
-                         loading={set === 0 ? 'eager' : 'lazy'} fetchpriority="low" decoding="async" draggable="false" />
+                         loading="eager" fetchpriority="low" decoding="async" draggable="false" />
                     <figcaption><span class="tile__no">{String(i + 1).padStart(2, '0')}</span>{it.caption}</figcaption>
                   </figure>
                 </li>
